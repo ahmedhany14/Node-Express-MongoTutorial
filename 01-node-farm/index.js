@@ -104,6 +104,7 @@ Write headers: the server should write headers before writing the response.
 we use it to set the content type of the response, for example, text/html, text/plain, application/json, etc. and the status code of the response, for example, 200, 404, 500, etc.
 */
 
+/*
 const serverRequest = function (request, response) {
     // get the route
     const route = request.url;
@@ -125,7 +126,7 @@ const serverRequest = function (request, response) {
 };
 
 const server = http.createServer(serverRequest)
-
+*/
 // 2.2) Starting a server
 
 /*
@@ -134,6 +135,30 @@ port is the port number that the server will listen to.
 host is the host name or IP address of the server.
 */
 
-server.listen(3000, "127.0.0", () => {
-    console.log('server is started');
+
+const data = file_system.readFileSync('/home/hany_jr/Back end/Node-Express-MongoTutorial/01-node-farm/dev-data/data.json', 'utf-8');
+const api_data = JSON.parse(data);
+console.log(typeof api_data);
+const serverRequest = function (request, response) {
+    route = request.url;
+    if (route === "/") {
+        response.end('Welcome to the home page');
+    }
+    else if (route == '/overview') {
+        response.end('This is the overview page');
+    }
+    else if (route == '/api') {
+        console.log('sss');
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(api_data);
+    }
+
+}
+
+const server = http.createServer(serverRequest)
+
+
+
+server.listen(1031, "127.0.0", () => {
+    console.log('server is started, start by visiting http://127.0.0:1031');
 });
