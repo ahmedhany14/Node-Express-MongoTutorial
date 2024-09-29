@@ -1,7 +1,7 @@
 const file_system = require('fs');
 const http = require('http');
 const url = require('url');
-
+const replaceTemplate = require('./JsModules/replaceTemp.js');
 // 1) File System 
 
 // 1.1) Reading Files
@@ -135,7 +135,7 @@ port is the port number that the server will listen to.
 host is the host name or IP address of the server.
 */
 
-
+/*
 const data = file_system.readFileSync('/home/hany_jr/Back end/Node-Express-MongoTutorial/01-node-farm/dev-data/data.json', 'utf-8');
 const api_data = JSON.parse(data);
 console.log(typeof api_data);
@@ -161,4 +161,51 @@ const server = http.createServer(serverRequest)
 
 server.listen(1031, "127.0.0", () => {
     console.log('server is started, start by visiting http://127.0.0:1031');
+});
+*/
+
+const data = file_system.readFileSync('/home/hany_jr/Back end/Node-Express-MongoTutorial/01-node-farm/dev-data/data.json', 'utf-8');
+const api_data = JSON.parse(data);
+
+
+const card_template = file_system.readFileSync('/home/hany_jr/Back end/Node-Express-MongoTutorial/01-node-farm/templates/template-card.html', 'utf-8');
+const overview_template = file_system.readFileSync('/home/hany_jr/Back end/Node-Express-MongoTutorial/01-node-farm/templates/template-overview.html', 'utf-8');
+const product_template = file_system.readFileSync('/home/hany_jr/Back end/Node-Express-MongoTutorial/01-node-farm/templates/template-product.html', 'utf-8');
+
+const serverRequest = function (request, response) {
+    const route = request.url;
+
+    const { query, pathname } = url.parse(request.url, true);
+
+    // 1) overview page
+    /*
+    will contain a list of all the products in the farm
+    */
+    if (pathname === '/overview') {
+        // make page as a html
+        let cards_html = api_data.map((product) => replaceTemplate(card_template, product)).join('');
+        let output = overview_template.replace(/{%PRODUCT_CARDS%}/g, cards_html);
+
+        response.writeHead(200, { 'Content-Type': 'text/html' });
+        response.end(output);
+    }
+    // 2) product page
+    /*
+    will contain the details of a specific product 
+    */
+    else if (pathname === '/product') {
+        const id = query.id;
+        const product = api_data[id];
+        const output = replaceTemplate(product_template, product);
+        response.writeHead(200, { 'Content-Type': 'text/html' });
+        response.end(output);
+    }
+    else {
+        response.end('Fuck you son of bitch');
+    }
+}
+const server = http.createServer(serverRequest);
+
+server.listen(1053, "127.0.0", () => {
+    console.log('server is started, start by visiting http://127.0.0:1053/overview');
 });
