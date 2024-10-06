@@ -3,6 +3,9 @@ const file_system = require('fs');
 
 const app = express();
 
+// middleware
+app.use(express.json());
+
 // tours api
 
 
@@ -44,6 +47,34 @@ app.get('/api/v1/tours/:id', (request, responce) => {
         });
     }
 });
+
+
+// Post a new tour
+app.post('/api/v1/tours', (request, responce) => {
+    // to get the data user sent, we use request.body
+    const new_id = tours[tours.length - 1].id + 1;
+    const new_tour = Object.assign({ id: new_id }, request.body);
+    tours.push(new_tour);
+
+    file_system.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), (err) => {
+        if (err) {
+            responce.status(404).json({
+                status: 'fail',
+                message: 'Error in writing the file'
+            });
+        }
+        else {
+            responce.status(201).json({
+                status: 'success',
+                data: {
+                    tour: new_tour
+                }
+            })
+        }
+    });
+    //responce.send('Done');
+});
+
 
 // start express app
 const PORT = 3000;
