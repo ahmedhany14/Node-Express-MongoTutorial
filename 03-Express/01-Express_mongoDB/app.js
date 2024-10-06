@@ -100,7 +100,7 @@ app.patch('/api/v1/tours/:id', (request, responce) => {
         console.log(typeof key)
         tours[id][key] = new_data[key]
     }
-    
+
     file_system.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), (err) => {
         if (err) {
             responce.status(404).json({
@@ -119,6 +119,39 @@ app.patch('/api/v1/tours/:id', (request, responce) => {
     });
 });
 
+// Delete a tour
+
+app.delete('/api/v1/tours/:id', (request, responce) => {
+    let id = parseInt(request.params.id);
+    let tour = tours.find((element) => {
+        return element.id === id;
+    });
+
+    if (!tour) {
+        responce.status(404).json({
+            succes: "faild",
+            message: "Invalid ID"
+        })
+        return;
+    }
+
+    const new_tours = tours.filter(ele => ele.id != id)
+
+    file_system.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(new_tours), (err) => {
+        if (err) {
+            responce.status(404).json({
+                status: 'fail',
+                message: 'Error in writing the file'
+            });
+        }
+        else {
+            responce.status(200).json({
+                status: 'ok',
+            })
+        }
+    });
+
+});
 // start express app
 const PORT = 3000;
 app.listen(PORT, () => {

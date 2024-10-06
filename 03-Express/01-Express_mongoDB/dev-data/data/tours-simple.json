@@ -140,19 +140,5 @@
     "duration": -9,
     "maxGroupSize": 10000,
     "difficulty": "Hard"
-  },
-  {
-    "id": 10,
-    "name": "Ahmed Test",
-    "duration": 1000,
-    "maxGroupSize": 10000,
-    "difficulty": "Hard"
-  },
-  {
-    "id": 11,
-    "name": "Ahmed Fuck it",
-    "duration": 1600,
-    "difficulty": "easy",
-    "new property": "i'm a new property"
   }
 ]
