@@ -4,13 +4,13 @@ const app = express();
 const morgan = require('morgan');
 
 const tours = JSON.parse(file_system.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
-
+const users = JSON.parse(file_system.readFileSync(`${__dirname}/dev-data/data/users.json`));
 
 app.use(express.json()); // middleware
 
 
 // custom middleware
-
+/*
 app.use((request, responce, next) => {
     console.log('Hello from the  first middleware function\n');
     // to continue to the next middleware, we use next()
@@ -35,7 +35,7 @@ app.use((request, responce, next) => {
     console.log(`request time: ${request.reqTime}`);
     next();
 })
-
+*/
 // third party middleware
 app.use(morgan('dev'));
 
@@ -193,6 +193,56 @@ app.route('/api/v1/tours/:id')
     .get(GetTour)
     .patch(UpdateTour)
     .delete(DeleteTour);
+
+
+
+// user api functions
+const GetAllUsers = (request, responce) => {
+    responce.status(200).json({
+        status: 'ok',
+        data: {
+            users: users
+        }
+    });
+}
+
+const GetUser = (request, responce) => {
+    responce.status(404).json({
+        status: 'error',
+        message: 'Not implemented yet'
+    });
+}
+
+const CreateUser = (request, responce) => {
+    responce.status(404).json({
+        status: 'error',
+        message: 'Not implemented yet'
+    });
+}
+
+const UpdateUser = (request, responce) => {
+    responce.status(404).json({
+        status: 'error',
+        message: 'Not implemented yet'
+    });
+}
+
+const DeleteUser = (request, responce) => {
+    responce.status(404).json({
+        status: 'error',
+        message: 'Not implemented yet'
+    });
+}
+
+
+// user api routes
+app.route('/api/v1/users')
+    .get(GetAllUsers)
+    .post(CreateUser);
+app.route('/api/v1/users/:id')
+    .get(GetUser)
+    .delete(DeleteUser)
+    .patch(UpdateUser);
 
 // start express app
 const PORT = 3000;
