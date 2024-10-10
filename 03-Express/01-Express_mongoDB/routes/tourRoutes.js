@@ -6,11 +6,11 @@ const router = express.Router();
 
 // middleware for checking id
 
-router.param('id', controller.checkID_MW);
+//router.param('id', controller.checkID_MW);
 
 router.route('/')
     .get(controller.GetAllTouts)
-    .post(controller.checkBody_MW, controller.CreateTour);
+    .post(controller.CreateTour);
 router.route('/:id')
     .get(controller.GetTour)
     .patch(controller.UpdateTour)

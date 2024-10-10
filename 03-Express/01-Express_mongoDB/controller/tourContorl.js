@@ -1,40 +1,25 @@
-const file_system = require('fs');
+const Tour = require('./../model/tourModel')
 
-const tour_path = `${__dirname}/../dev-data/data/tours-simple.json`;
-const tours = JSON.parse(file_system.readFileSync(tour_path))
+exports.GetAllTouts = async (request, responce) => {
 
-exports.checkID_MW = (request, responce, next, ID) => {
-    let tour = tours.find((element) => {
-        return element.id == ID;
-    });
-    if (!tour) {
-        return responce.status(404).json({
-            succes: "faild",
-            message: "Invalid ID"
+    try {
+        const allTours = await Tour.find();
+        responce.status(200).json({
+            status: 'success',
+            results: allTours.length,
+            data: {
+                tours: allTours
+            }
         })
     }
-    next();
-};
-
-exports.checkBody_MW = (request, responce, next) => {
-    console.log(request.body)
-    if (!request.body.name) {
-        return responce.status(404).json({
-            succes: "faild",
-            message: "Invalid data"
-        });
+    catch (err) {
+        console.log("error in getting all data function")
+        responce.status(404).json({
+            status: 'fail',
+            message: "Data base error"
+        })
     }
-    next();
-}
 
-exports.GetAllTouts = (request, responce) => {
-    responce.status(200).json({
-        status: 'success',
-        results: tours.length,
-        data: {
-            tours: tours
-        }
-    })
 };
 
 // get a specific tour by id
@@ -43,87 +28,94 @@ to make a parameter in the URL, we use : before the parameter name
 to make the parameter optional, we use ? after the parameter name
 to get the parameter value, we use request.params and from it we can get the parameter value
 */
-exports.GetTour = (request, responce) => {
-    let id = parseInt(request.params.id);
-    let tour = tours.find((element) => {
-        return element.id == id;
-    });
-    responce.status(200).json({
-        status: 'success',
-        data: {
-            tour: tour
-        }
-    });
-}
+exports.GetTour = async (request, responce) => {
 
-exports.CreateTour = (request, responce) => {
-    // to get the data user sent, we use request.body
-    const new_id = tours[tours.length - 1].id + 1;
-    const new_tour = Object.assign({ id: new_id }, request.body);
+    try {
+        const id = request.params.id;
+        const tour = await Tour.findById(id);
+        // Tour.findOne({_id: id});
 
-    tours.push(new_tour);
-
-    file_system.writeFile(tour_path, JSON.stringify(tours), (err) => {
-        if (err) {
-            responce.status(404).json({
-                status: 'fail',
-                message: 'Error in writing the file'
-            });
-        }
-        else {
-            responce.status(201).json({
-                status: 'success',
-                data: {
-                    tour: new_tour
-                }
-            })
-        }
-    });
-}
-
-exports.UpdateTour = (request, responce) => {
-    let id = parseInt(request.params.id);
-    const new_data = request.body;
-
-    for (let key in new_data) {
-        console.log(typeof key)
-        tours[id][key] = new_data[key]
+        responce.status(200).json({
+            status: 'success',
+            data: {
+                tour: tour
+            }
+        });
+    } catch (err) {
+        console.log('error in GetTour function');
+        responce.status(404).json({
+            status: 'fails',
+            message: 'Invalid Id'
+        });
     }
-
-    file_system.writeFile(tour_path, JSON.stringify(tours), (err) => {
-        if (err) {
-            responce.status(404).json({
-                status: 'fail',
-                message: 'Error in writing the file'
-            });
-        }
-        else {
-            responce.status(201).json({
-                status: 'success modified',
-                data: {
-                    tour: tours[id]
-                }
-            })
-        }
-    });
 }
 
-exports.DeleteTour = (request, responce) => {
-    let id = parseInt(request.params.id);
+exports.CreateTour = async (request, responce) => {
+    // to get the data user sent, we use request.body
+    /*
+    // Old way
+    const new_tour = new Tour({});
+    new_tour.save();
+    */
+    try {
+        // new wat to create a new Tour data
+        const new_tour = await Tour.create(
+            request.body
+        )
+        responce.status(201).json({
+            status: 'success',
+            data: {
+                tour: new_tour
+            }
+        })
+    }
+    catch (err) {
+        console.log('Error in creating new tour');
+        responce.status(404).json({
+            status: 'fail',
+            message: "Inavalid Data"
+        })
+    }
+}
 
-    const new_tours = tours.filter(ele => ele.id != id)
+exports.UpdateTour = async (request, responce) => {
 
-    file_system.writeFile(tour_path, JSON.stringify(new_tours), (err) => {
-        if (err) {
-            responce.status(404).json({
-                status: 'fail',
-                message: 'Error in writing the file'
-            });
-        }
-        else {
-            responce.status(200).json({
-                status: 'ok',
-            })
-        }
-    });
+    try {
+        let id = request.params.id;
+        const new_tour = await Tour.findByIdAndUpdate(id, request.body, { new: true })
+        responce.status(200).json({
+            status: 'ok',
+            data: {
+                tour: new_tour
+            }
+        })
+
+    } catch (err) {
+        console.log('Error in UpdateTour Function')
+        responce.status(404).json({
+            status: 'fail',
+            message: 'Something wrong',
+        });
+
+    }
+}
+
+exports.DeleteTour = async (request, responce) => {
+
+    try {
+        let id = request.params.id;
+        const new_tour = await Tour.findByIdAndDelete(id, request.body, { new: true })
+        responce.status(200).json({
+            status: 'ok',
+            data: {
+                tour: new_tour
+            }
+        })
+    } catch (err) {
+        console.log('Error in DeleteTour Function')
+        responce.status(404).json({
+            status: 'fail',
+            message: 'Something wrong',
+        });
+    }
 }
