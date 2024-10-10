@@ -103,13 +103,9 @@ exports.UpdateTour = async (request, responce) => {
 exports.DeleteTour = async (request, responce) => {
 
     try {
-        let id = request.params.id;
-        const new_tour = await Tour.findByIdAndDelete(id, request.body, { new: true })
+        await Tour.findByIdAndDelete(request.params.id, request.body, { new: true })
         responce.status(200).json({
             status: 'ok',
-            data: {
-                tour: new_tour
-            }
         })
     } catch (err) {
         console.log('Error in DeleteTour Function')
