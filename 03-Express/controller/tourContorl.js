@@ -3,12 +3,28 @@ const Tour = require('./../model/tourModel')
 exports.GetAllTouts = async (request, responce) => {
 
     try {
-        const allTours = await Tour.find();
+        // Filter the data
+
+        const filters = request.query;
+
+
+        // Some times we have some parameters that will not be used in the find method like (sort, page, .... ect), so we need to make sure that we search with a valid parameters
+        const exc_params = ['page', 'sort', 'limit'];
+
+        exc_params.forEach(ele => delete filters[ele])
+
+
+        // 1) The first way, to search with the filter object taht comes from the query
+        const filtere_tours = await Tour.find(filters)
+
+        // 2) where method
+        //const filtere_tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
+        //const filtere_tours = await Tour.find().where('maxGroupSize').lt(10);
         responce.status(200).json({
             status: 'success',
-            results: allTours.length,
+            results: filtere_tours.length,
             data: {
-                tours: allTours
+                tours: filtere_tours
             }
         })
     }
