@@ -4,32 +4,45 @@ exports.GetAllTouts = async (request, responce) => {
 
     try {
         // Filter the data
+        let filters = request.query;
 
-        const filters = request.query;
-
-
-        // Some times we have some parameters that will not be used in the find method like (sort, page, .... ect), so we need to make sure that we search with a valid parameters
+        // Sometimes we have some parameters that will not be used in the find method like (sort, page, .... ect), so we need to make sure that we search with a valid parameters
         const exc_params = ['page', 'sort', 'limit'];
 
         exc_params.forEach(ele => delete filters[ele])
 
-
         // 1) The first way, to search with the filter object taht comes from the query
-        const filtere_tours = await Tour.find(filters)
+        //const filtere_tours = await Tour.find(filters)
 
-        
         // 2) where method
         //const filtere_tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
         //const filtere_tours = await Tour.find().where('maxGroupSize').lt(10);
+
+        // 3) Advanced Filtering
+        /**
+         * Filter based on greater and less
+         * the api looks like ......?x[gte]=10&y[lt]=15
+         * and so on, in monogo we the query takes the parameter with $ at the beginning.
+         */
+        // .1 replace all [gte, gt, lt, lte] with $ + gte, gt, lt, lte
+        // convert filters to Json
+        filters = JSON.stringify(filters);
+
+        filters = filters.replace(/\b(gte|gt|lt|lte)\b/g, match => {
+            return `$${match}`;
+        })
+
+        filters = JSON.parse(filters);
+        const filter_tours = await Tour.find(filters)
+
         responce.status(200).json({
             status: 'success',
-            results: filtere_tours.length,
+            results: filter_tours.length,
             data: {
-                tours: filtere_tours
+                tours: filter_tours
             }
         })
-    }
-    catch (err) {
+    } catch (err) {
         console.log("error in getting all data function")
         responce.status(404).json({
             status: 'fail',
@@ -85,8 +98,7 @@ exports.CreateTour = async (request, responce) => {
                 tour: new_tour
             }
         })
-    }
-    catch (err) {
+    } catch (err) {
         console.log('Error in creating new tour');
         responce.status(404).json({
             status: 'fail',
@@ -99,7 +111,7 @@ exports.UpdateTour = async (request, responce) => {
 
     try {
         let id = request.params.id;
-        const new_tour = await Tour.findByIdAndUpdate(id, request.body, { new: true })
+        const new_tour = await Tour.findByIdAndUpdate(id, request.body, {new: true})
         responce.status(200).json({
             status: 'ok',
             data: {
@@ -120,7 +132,7 @@ exports.UpdateTour = async (request, responce) => {
 exports.DeleteTour = async (request, responce) => {
 
     try {
-        await Tour.findByIdAndDelete(request.params.id, request.body, { new: true })
+        await Tour.findByIdAndDelete(request.params.id, request.body, {new: true})
         responce.status(200).json({
             status: 'ok',
         })
