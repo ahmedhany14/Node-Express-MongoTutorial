@@ -17,6 +17,7 @@ exports.GetAllTouts = async (request, responce) => {
         // 1) The first way, to search with the filter object taht comes from the query
         const filtere_tours = await Tour.find(filters)
 
+        
         // 2) where method
         //const filtere_tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
         //const filtere_tours = await Tour.find().where('maxGroupSize').lt(10);
