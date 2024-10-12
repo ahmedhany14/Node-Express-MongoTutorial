@@ -33,15 +33,12 @@ exports.GetAllTouts = async (request, responce) => {
             return `$${match}`;
         })
 
-        filters = JSON.parse(filters);
-        // 4) Sorting
-        let sortBy = "";
-        if (request.query.sort) sortBy = request.query.sort.split(',').join(' ');
+        let sort_by = "-createdAt", fields = '-__v';
+        if (request.query.sort) sort_by = request.query.sort.split(',').join(' ');
+        if (request.query.fields) fields = request.query.fields.split(',').join(' ');
 
-        console.log(sortBy);
-        let filter_tours = await Tour.find(filters);
-        if(sortBy.length > 0)
-             filter_tours = Tour.find(filters).sort(sortBy);
+        let filter_tours = await Tour.find(JSON.parse(filters)).sort(sort_by).select(fields);
+
         responce.status(200).json({
             status: 'success',
             results: filter_tours.length,
