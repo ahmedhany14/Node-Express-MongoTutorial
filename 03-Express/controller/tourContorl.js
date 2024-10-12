@@ -4,7 +4,8 @@ exports.GetAllTouts = async (request, responce) => {
 
     try {
         // Filter the data
-        let filters = request.query;
+
+        let filters = Object.create(request.query);
 
         // Sometimes we have some parameters that will not be used in the find method like (sort, page, .... ect), so we need to make sure that we search with a valid parameters
         const exc_params = ['page', 'sort', 'limit'];
@@ -33,8 +34,14 @@ exports.GetAllTouts = async (request, responce) => {
         })
 
         filters = JSON.parse(filters);
-        const filter_tours = await Tour.find(filters)
+        // 4) Sorting
+        let sortBy = "";
+        if (request.query.sort) sortBy = request.query.sort.split(',').join(' ');
 
+        console.log(sortBy);
+        let filter_tours = await Tour.find(filters);
+        if(sortBy.length > 0)
+             filter_tours = Tour.find(filters).sort(sortBy);
         responce.status(200).json({
             status: 'success',
             results: filter_tours.length,
@@ -46,7 +53,7 @@ exports.GetAllTouts = async (request, responce) => {
         console.log("error in getting all data function")
         responce.status(404).json({
             status: 'fail',
-            message: "Data base error"
+            message: err.message
         })
     }
 
