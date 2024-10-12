@@ -37,7 +37,13 @@ exports.GetAllTouts = async (request, responce) => {
         if (request.query.sort) sort_by = request.query.sort.split(',').join(' ');
         if (request.query.fields) fields = request.query.fields.split(',').join(' ');
 
-        let filter_tours = await Tour.find(JSON.parse(filters)).sort(sort_by).select(fields);
+
+        let page = 1, limit = 2;
+        if (request.query.page) page = parseInt(request.query.page);
+        if (request.query.limit) limit = parseInt(request.query.limit);
+        let skip = (page - 1) * limit;
+        console.log(skip, limit)
+        let filter_tours = await Tour.find(JSON.parse(filters)).select(fields).skip(skip).limit(limit);
 
         responce.status(200).json({
             status: 'success',
