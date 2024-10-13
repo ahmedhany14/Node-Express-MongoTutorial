@@ -46,7 +46,7 @@ exports.GetTour = async (request, responce) => {
         console.log('error in GetTour function');
         responce.status(404).json({
             status: 'fails',
-            message: 'Invalid Id'
+            message: err.message,
         });
     }
 }
@@ -73,7 +73,7 @@ exports.CreateTour = async (request, responce) => {
         console.log('Error in creating new tour');
         responce.status(404).json({
             status: 'fail',
-            message: "Inavalid Data"
+            message: err.message,
         })
     }
 }
@@ -94,7 +94,7 @@ exports.UpdateTour = async (request, responce) => {
         console.log('Error in UpdateTour Function')
         responce.status(404).json({
             status: 'fail',
-            message: 'Something wrong',
+            message: err.message,
         });
 
     }
@@ -111,7 +111,47 @@ exports.DeleteTour = async (request, responce) => {
         console.log('Error in DeleteTour Function')
         responce.status(404).json({
             status: 'fail',
-            message: 'Something wrong',
+            message: err.message,
+        });
+    }
+}
+
+
+exports.GetTourDetail = async (request, responce) => {
+    try {
+        const stats = await Tour.aggregate([
+            {
+                $match: {ratingsAverage: {$gte: 4.5}}
+            },
+            {
+                $group: {
+                    _id: {$toUpper: '$difficulty'},
+                    numTours: {$sum: 1},
+                    numRatings: {$sum: '$ratingsQuantity'},
+                    avgRate: {$avg: '$ratingsAverage'},
+                    avgPrice: {$avg: '$price'},
+                    sumPrice: {$sum: '$price'},
+                    minPrice: {$min: '$price'},
+                    maxPrice: {$max: '$price'},
+                }
+            },
+            {
+                $match: {_id: {$ne: 'EASY'}}
+            }
+
+        ])
+        responce.status(200).json({
+            status: 'ok',
+            data: {
+                stats
+            }
+        })
+
+    } catch (err) {
+        console.log('Error in GetTourDetail Function')
+        responce.status(404).json({
+            status: 'fail',
+            message: err.message,
         });
     }
 }

@@ -11,6 +11,10 @@ const router = express.Router();
 router.route('/')
     .get(controller.GetAllTouts)
     .post(controller.CreateTour);
+
+router.route('/tour-states')
+    .get(controller.GetTourDetail)
+
 router.route('/:id')
     .get(controller.GetTour)
     .patch(controller.UpdateTour)
