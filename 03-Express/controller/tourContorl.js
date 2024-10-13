@@ -1,55 +1,16 @@
 const Tour = require('./../model/tourModel')
-
+const ApiFeature = require('./../Utils/apiFeatures')
 exports.GetAllTouts = async (request, responce) => {
 
     try {
-        // Filter the data
-
-        let filters = Object.create(request.query);
-
-        // Sometimes we have some parameters that will not be used in the find method like (sort, page, .... ect), so we need to make sure that we search with a valid parameters
-        const exc_params = ['page', 'sort', 'limit'];
-
-        exc_params.forEach(ele => delete filters[ele])
-
-        // 1) The first way, to search with the filter object taht comes from the query
-        //const filtere_tours = await Tour.find(filters)
-
-        // 2) where method
-        //const filtere_tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
-        //const filtere_tours = await Tour.find().where('maxGroupSize').lt(10);
-
-        // 3) Advanced Filtering
-        /**
-         * Filter based on greater and less
-         * the api looks like ......?x[gte]=10&y[lt]=15
-         * and so on, in monogo we the query takes the parameter with $ at the beginning.
-         */
-        // .1 replace all [gte, gt, lt, lte] with $ + gte, gt, lt, lte
-        // convert filters to Json
-        filters = JSON.stringify(filters);
-
-        filters = filters.replace(/\b(gte|gt|lt|lte)\b/g, match => {
-            return `$${match}`;
-        })
-
-        let sort_by = "-createdAt", fields = '-__v';
-        if (request.query.sort) sort_by = request.query.sort.split(',').join(' ');
-        if (request.query.fields) fields = request.query.fields.split(',').join(' ');
-
-
-        let page = 1, limit = 2;
-        if (request.query.page) page = parseInt(request.query.page);
-        if (request.query.limit) limit = parseInt(request.query.limit);
-        let skip = (page - 1) * limit;
-        console.log(skip, limit)
-        let filter_tours = await Tour.find(JSON.parse(filters)).select(fields).skip(skip).limit(limit);
+        const feature = new ApiFeature(Tour.find(), request.query).filter().sort().limitRes().limitFields().pagination();
+        const tour = await feature.query;
 
         responce.status(200).json({
             status: 'success',
-            results: filter_tours.length,
+            results: tour.length,
             data: {
-                tours: filter_tours
+                tours: tour
             }
         })
     } catch (err) {
