@@ -15,6 +15,9 @@ router.route('/')
 router.route('/tour-states')
     .get(controller.GetTourDetail)
 
+router.route('/monthly-plan/:year')
+    .get(controller.GetMonthlyPlan)
+
 router.route('/:id')
     .get(controller.GetTour)
     .patch(controller.UpdateTour)
