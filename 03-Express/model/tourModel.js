@@ -12,6 +12,10 @@ const tourSchema = new mongoose.Schema(
             minlength: [10, 'A tour name must have more or equal then 10 characters']
             // validate: [validator.isAlpha, 'Tour name must only contain characters']
         },
+        secretTour: {
+            type: Boolean,
+            default: false
+        },
         name_slug: String,
         duration: {
             type: Number,
@@ -94,14 +98,46 @@ tourSchema.pre('save', function (next) {
     next();
 })
 
-tourSchema.pre('save', function(next){
+tourSchema.pre('save', function (next) {
     console.log('second middleware');
     next();
 })
 
 // this middle ware called after when we create or save a new collection
-tourSchema.post('save', function(doc, next){
+tourSchema.post('save', function (doc, next) {
     console.log('third middleware after post');
+    next();
+})
+
+// Query middleware, we can apply middleware after queries, like find, delete and upadte..... ect
+
+
+//tourSchema.pre('find', function (doc, next) {
+
+tourSchema.pre(/^find/, function (next) {
+    console.log('first find mw');
+    this.find();
+    next();
+})
+
+// middleware to filter the docus, that is not secret
+
+tourSchema.pre(/^find/, function (next) {
+    console.log('second find mw to filter the docs');
+
+    this.find({
+        secretTour: { $ne: true }
+    })
+
+    next();
+})
+
+tourSchema.post(/^find/, function (doc, next) {
+    console.log('thirs find mw after filter the docs');
+    if (doc)
+        console.log(doc.length)
+    else
+        console.log('nothing to display')
     next();
 })
 
