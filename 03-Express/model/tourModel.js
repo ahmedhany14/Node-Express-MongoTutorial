@@ -125,21 +125,33 @@ tourSchema.pre(/^find/, function (next) {
 tourSchema.pre(/^find/, function (next) {
     console.log('second find mw to filter the docs');
 
+    this.startQuery = Date.now();
     this.find({
         secretTour: { $ne: true }
     })
-
     next();
 })
 
 tourSchema.post(/^find/, function (doc, next) {
     console.log('thirs find mw after filter the docs');
+    console.log('query takes ', Date.now() - this.startQuery, ' ms')
     if (doc)
         console.log(doc.length)
     else
         console.log('nothing to display')
     next();
 })
+
+
+// aggregation middleware
+// filter query from the secret tours
+tourSchema.pre('aggregate', function (next) {
+    this.pipeline().unshift(
+        { $match: { secretTour: { $ne: true } } }
+    );
+    console.log(this.pipeline());
+    next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
