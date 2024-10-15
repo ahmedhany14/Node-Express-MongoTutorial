@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require('slugify')
 
 const tourSchema = new mongoose.Schema(
     {
@@ -11,6 +12,7 @@ const tourSchema = new mongoose.Schema(
             minlength: [10, 'A tour name must have more or equal then 10 characters']
             // validate: [validator.isAlpha, 'Tour name must only contain characters']
         },
+        name_slug: String,
         duration: {
             type: Number,
             required: [true, 'A tour must have a duration']
@@ -66,8 +68,8 @@ const tourSchema = new mongoose.Schema(
     },
     // to apply the virtual properties, we need to make it true in the schema
     {
-        toJSON:{virtuals:true},
-        toObject:{virtuals:true},
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
 
     }
 );
@@ -80,6 +82,28 @@ For example, we want to calculate the duration weeks based on the duration days
 tourSchema.virtual('durationinWeeks').get(function () {
     return this.duration / 7;
 });
+
+
+// Document middle ware, this middle ware called before when we create or save a new collection
+// so we can edit the document
+tourSchema.pre('save', function (next) {
+    console.log('first middleware');
+    // constains the created docu
+    //console.log(this)
+    this.name_slug = slugify(this.name, { lower: true })
+    next();
+})
+
+tourSchema.pre('save', function(next){
+    console.log('second middleware');
+    next();
+})
+
+// this middle ware called after when we create or save a new collection
+tourSchema.post('save', function(doc, next){
+    console.log('third middleware after post');
+    next();
+})
 
 const Tour = mongoose.model('Tour', tourSchema);
 
