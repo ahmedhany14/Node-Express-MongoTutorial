@@ -10,6 +10,11 @@ const CastduplicateDB = err => {
     return new AppError(message, 400);
 };
 
+const CastValiationError = err => {
+    const erros = Object.values(err.errors).map( el => el.message)
+    const messages = `Invalid Date, ${erros.join(', ')}`;
+    return new AppError(messages, 400);
+}
 
 const developmentError = (err, res) => {
     res.status(err.statusCode).json({
@@ -27,8 +32,7 @@ const productionError = (err, res) => {
             status: err.status,
             message: err.message
         })
-    }
-    else {
+    } else {
         res.status(500).json({
             states: 'error',
             message: 'Something went wrong'
@@ -48,12 +52,11 @@ module.exports = (err, req, res, next) => {
     if (process.env.NODE_ENV === 'development') developmentError(err, res);
     else {
 
-        let error = { ...err };
+        let error = {...err};
 
         if (err.name === 'CastError') error = CastErrorDB(error);
-        if (err.code == 11000)
-            error = CastduplicateDB(error)
+        if (err.code == 11000) error = CastduplicateDB(error)
+        if (err.statusCode == 500) error = CastValiationError(error);
         productionError(error, res);
-
     }
 }
