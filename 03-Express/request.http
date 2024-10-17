@@ -1,8 +1,8 @@
 
-GET http://127.0.0.1:3000/api/v1/tours/670e67f4bba4e8cfff766db0
+GET http://127.0.0.1:3000/api/v1/tours
 
 ###
-GET http://127.0.0.1:3000/api/v1/tours 
+GET http://127.0.0.1:3000/api/v1/tour
 
 ###
 
