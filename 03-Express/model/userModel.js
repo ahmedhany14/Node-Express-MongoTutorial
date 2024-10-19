@@ -22,7 +22,14 @@ const userSchema = new mongoose.Schema({
     passwordConfirm: {
         type: String,
         required: [true, 'no field enterd'],
-        minlength: [8, 'the password should be at least 8 characterd']
+        minlength: [8, 'the password should be at least 8 characterd'],
+        validate: {
+            // will works with save and create only, but not with update, so take care
+            validator: function (pass) {
+                return pass == this.password
+            },
+            message: "Passwords are not the same"
+        }
     }
 })
 
