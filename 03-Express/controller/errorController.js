@@ -56,7 +56,7 @@ module.exports = (err, req, res, next) => {
         let error = { ...err };
         if (err.name === 'CastError') error = CastErrorDB(error);
         else if (err.code == 11000) error = CastduplicateDB(error)
-        else if (err.statusCode == 500) error = CastValiationError(error);
+        //else if (err.statusCode == 500) error = CastValiationError(error);
 
         productionError(error, res);
     }

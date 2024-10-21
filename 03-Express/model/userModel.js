@@ -43,6 +43,10 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
+userSchema.methods.compare_password = async function (password, correct_password) {
+    return await encode.compare(password, correct_password)
+}
+
 const users = mongoose.model('users', userSchema)
 
 module.exports = users
