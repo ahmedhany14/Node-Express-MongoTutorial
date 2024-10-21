@@ -1,17 +1,17 @@
-const file_system = require('fs');
-
-const user_path = `${__dirname}/../dev-data/data/users.json`;
-const users = JSON.parse(file_system.readFileSync(user_path));
+const catchAsyncErrors = require("./../Utils/catchError")
+const Users = require("./../model/userModel")
 
 // user api functions
-exports.GetAllUsers = (request, responce) => {
+exports.GetAllUsers = catchAsyncErrors(async (request, responce, next) => {
+    const users = await Users.find()
+
     responce.status(200).json({
         status: 'ok',
         data: {
             users: users
         }
     });
-}
+})
 
 exports.GetUser = (request, responce) => {
     responce.status(404).json({

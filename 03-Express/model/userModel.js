@@ -18,7 +18,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'no password enterd'],
-        minlength: [8, 'the password should be at least 8 characterd']
+        minlength: [8, 'the password should be at least 8 characterd'],
+        select: false
     },
     passwordConfirm: {
         type: String,
@@ -30,7 +31,7 @@ const userSchema = new mongoose.Schema({
                 return pass == this.password
             },
             message: "Passwords are not the same"
-        }
+        },
     }
 })
 
