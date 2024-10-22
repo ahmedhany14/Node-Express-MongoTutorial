@@ -16,6 +16,8 @@ const CastValiationError = err => {
     return new AppError(messages, 400);
 }
 
+const JsonWebTokenError = err => new AppError('Invalid token please log in again.', 404)
+
 const developmentError = (err, res) => {
     res.status(err.statusCode).json({
         status: err.status,
@@ -53,11 +55,13 @@ module.exports = (err, req, res, next) => {
     if (process.env.NODE_ENV === 'development') developmentError(err, res);
     else {
 
+        console.log(err)
         let error = { ...err };
+
         if (err.name === 'CastError') error = CastErrorDB(error);
         else if (err.code == 11000) error = CastduplicateDB(error)
         //else if (err.statusCode == 500) error = CastValiationError(error);
-
+        if (err.name == "JsonWebTokenError") error = JsonWebTokenError(err)
         productionError(error, res);
     }
 }
