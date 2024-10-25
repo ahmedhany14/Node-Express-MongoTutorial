@@ -4,6 +4,7 @@ const users = require('./../model/userModel')
 const catchAsyncErrors = require('./../Utils/catchError.js');
 const AppError = require('./../Utils/appErros.js')
 const bcryptjs = require('bcryptjs')
+const sendEmail = require('./../Utils/email.js')
 
 const token_sign = async function (id) {
     return await jwt.sign({id}, process.env.JWT_Secret, {
@@ -18,9 +19,7 @@ exports.signUp = catchAsyncErrors(async (request, responce, next) => {
     const token = await token_sign(user._id)
 
     responce.status(201).json({
-        status: 'succes',
-        token: token,
-        message: user
+        status: 'succes', token: token, message: user
     });
 })
 
@@ -43,9 +42,7 @@ exports.login = catchAsyncErrors(async (request, responce, next) => {
     const token = await token_sign(user._id)
 
     responce.status(201).json({
-        status: 'succes',
-        token: token,
-        message: user
+        status: 'succes', token: token, message: user
     })
 })
 
@@ -113,5 +110,23 @@ exports.forgetpassword = async (req, res, next) => {
 
     // to avoid this error we will use validateBeforeSave: false to ignore the valdator
     await user.save({validateBeforeSave: false});
-    next(new AppError('no implemented yet', 401));
+
+    // send email to the user to reset the password
+
+    try {
+        await sendEmail({
+            email: email,
+            subject: 'Nature Password recovery',
+            message: `Hello ${user.name}.\nTo change the password click ${req.protocol}://${req.get('host')}:/api/v1/users/resetpassword\nyou have 10 minutes to reset your password.\nThe nature team`,
+        })
+        res.status(200).json({
+            status: 'success', message: 'Password recovered successfully please check your email'
+        })
+    } catch (err) {
+        user.passwordResetToken = undefined;
+        user.passwordTokenExpire = undefined;
+        console.log(err)
+        next(new AppError('There is a problem in sending the Password recovered email please try again later', 500))
+    }
+
 }
