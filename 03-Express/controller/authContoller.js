@@ -1,4 +1,4 @@
-const { promisify } = require('util')
+const {promisify} = require('util')
 const jwt = require('jsonwebtoken');
 const users = require('./../model/userModel')
 const catchAsyncErrors = require('./../Utils/catchError.js');
@@ -6,7 +6,7 @@ const AppError = require('./../Utils/appErros.js')
 const bcryptjs = require('bcryptjs')
 
 const token_sign = async function (id) {
-    return await jwt.sign({ id }, process.env.JWT_Secret, {
+    return await jwt.sign({id}, process.env.JWT_Secret, {
         expiresIn: process.env.JWT_expired
     })
 }
@@ -26,13 +26,13 @@ exports.signUp = catchAsyncErrors(async (request, responce, next) => {
 
 
 exports.login = catchAsyncErrors(async (request, responce, next) => {
-    const { email, password } = request.body;
+    const {email, password} = request.body;
 
     if (!email || !password) {
         return next(new AppError('Please provide the password and email', 400))
     }
 
-    const user = await users.findOne({ email: email }).select('+password')
+    const user = await users.findOne({email: email}).select('+password')
 
     const is_correct_password = await user.compare_password(password, user.password)
 
@@ -75,7 +75,7 @@ exports.protect = catchAsyncErrors(async (req, res, next) => {
 
     const user_id = decoded.id;
 
-    const user = await users.findById({ _id: user_id })
+    const user = await users.findById({_id: user_id})
 
     if (!user) {
         const error = new AppError('the user Not founded', 404)
@@ -88,6 +88,12 @@ exports.protect = catchAsyncErrors(async (req, res, next) => {
         next(error)
     }
 
-    res.user = user;
+    req.user = user;
     next()
 })
+
+exports.Permission = (...roles) => {
+    return (req, res, next) => {
+        return roles.includes(req.user.role) ? next() : next(new AppError('You do not have permission to perform this action', 401));
+    }
+}

@@ -22,7 +22,11 @@ router.route('/monthly-plan/:year')
 router.route('/:id')
     .get(controller.GetTour)
     .patch(controller.UpdateTour)
-    .delete(controller.DeleteTour);
+    .delete(
+        auth.protect,
+        auth.Permission('admin', 'lead-guide'),
+        controller.DeleteTour
+    );
 
 
 module.exports = router;
