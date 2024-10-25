@@ -97,3 +97,21 @@ exports.Permission = (...roles) => {
         return roles.includes(req.user.role) ? next() : next(new AppError('You do not have permission to perform this action', 401));
     }
 }
+
+
+exports.forgetpassword = async (req, res, next) => {
+    const email = req.body.email;
+
+    const user = await users.findOne({email: email});
+    if (!user) return next(new AppError('There is no user with this email you nee to sign up', 401))
+
+
+    const resetToken = user.resetTokenPassword();
+
+    // will get error, because of valiators
+    //await user.save();
+
+    // to avoid this error we will use validateBeforeSave: false to ignore the valdator
+    await user.save({validateBeforeSave: false});
+    next(new AppError('no implemented yet', 401));
+}

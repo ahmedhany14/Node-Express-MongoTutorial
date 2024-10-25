@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require('validator');
 const encode = require('bcryptjs')
-
+const crypto = require("crypto");
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -39,7 +39,9 @@ const userSchema = new mongoose.Schema({
         },
     },
 
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordTokenExpire: Date,
 })
 
 userSchema.pre('save', async function (next) {
@@ -60,6 +62,19 @@ userSchema.methods.passwordChanged = function (JWT_Date) {
         return newchange_date > JWT_Date;
     }
     return false;
+}
+
+userSchema.methods.resetTokenPassword = function () {
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // encrypt the token, because if any one has the access to the DB can't know it
+    this.passwordResetToken = crypto.createHash('sha256').update(token).digest('hex')
+    this.passwordTokenExpire = Date.now() + 60 * 10 * 1000;
+
+    console.log('original token', token)
+    console.log('encrypted token', this.passwordResetToken)
+    console.log('ended at :', this.passwordTokenExpire)
+    return token;
 }
 
 const users = mongoose.model('users', userSchema)
