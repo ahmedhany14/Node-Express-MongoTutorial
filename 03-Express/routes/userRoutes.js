@@ -15,6 +15,11 @@ router.route('/forgetpass')
 router.route('/reset/:token')
     .post(auth.resetPassword)
 
+router.route('/change-password')
+    .post(
+        auth.protect,
+        auth.updatePassword
+    )
 
 router.route('/')
     .get(controller.GetAllUsers)

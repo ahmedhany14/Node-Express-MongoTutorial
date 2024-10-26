@@ -167,3 +167,31 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
         status: 'success', token: new_token, message: user
     });
 })
+
+
+exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
+
+    // 1) Check id user is existed
+    const id = req.user._id;
+    const user = await users.findById(id).select('+password');
+
+    if (!user) return next(new AppError('You do not have permission to perform this action', 401));
+
+    // 2) check if the posted password is correct.
+    const {oldPassword, newPassword, confirm} = req.body;
+
+    const is_correct_password = await user.compare_password(oldPassword, user.password)
+    if (!is_correct_password) return next(new AppError("Password is incorrect", 401));
+
+    // 3) update data in the database
+    user.password = newPassword;
+    user.passwordConfirm = confirm
+    await user.save();
+
+    // 4) log in with new token
+    const new_token = await token_sign(user._id)
+    res.status(201).json({
+        status: 'success', new_token: new_token, message: user
+    });
+
+})
