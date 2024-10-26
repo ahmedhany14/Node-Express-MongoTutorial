@@ -5,6 +5,8 @@ const catchAsyncErrors = require('./../Utils/catchError.js');
 const AppError = require('./../Utils/appErros.js')
 const bcryptjs = require('bcryptjs')
 const sendEmail = require('./../Utils/email.js')
+const crypto = require('crypto')
+const {response} = require("express");
 
 const token_sign = async function (id) {
     return await jwt.sign({id}, process.env.JWT_Secret, {
@@ -112,13 +114,17 @@ exports.forgetpassword = async (req, res, next) => {
     await user.save({validateBeforeSave: false});
 
     // send email to the user to reset the password
-
     try {
-        await sendEmail({
+        /*await sendEmail({
             email: email,
             subject: 'Nature Password recovery',
-            message: `Hello ${user.name}.\nTo change the password click ${req.protocol}://${req.get('host')}:/api/v1/users/resetpassword\nyou have 10 minutes to reset your password.\nThe nature team`,
-        })
+            message: `Hello ${user.name}.\nTo change the password click ${req.protocol}://${req.get('host')}:/api/v1/users/resetpassword/${resetToken}you have 10 minutes to reset your password.\nThe nature team`,
+        })*/
+        const message = `Hello ${user.name}.
+To change the password click ${req.protocol}//${req.get('host')}/api/v1/users/reset/${resetToken}
+you have 10 minutes to reset your password.
+The nature team`;
+        console.log(message);
         res.status(200).json({
             status: 'success', message: 'Password recovered successfully please check your email'
         })
@@ -130,3 +136,34 @@ exports.forgetpassword = async (req, res, next) => {
     }
 
 }
+
+exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
+    // 1) get user form the token
+
+    const token = req.params.token;
+    const Hash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await users.findOne({
+        passwordResetToken: Hash, passwordTokenExpire: {
+            $gte: Date.now(),
+        }
+    });
+
+    // 2) Check the expiration of the token
+    if (!user) return next(new AppError('Token invalid or expired', 401))
+
+    // 3) update data in the DB
+    const {password, passwordConfirm} = req.body;
+    user.passwordResetToken = undefined;
+    user.passwordTokenExpire = undefined;
+    user.password = password
+    user.passwordConfirm = passwordConfirm
+    await user.save();
+
+    // 4) log the user in the app
+    const new_token = await token_sign(user._id)
+
+    res.status(201).json({
+        status: 'success', token: new_token, message: user
+    });
+})

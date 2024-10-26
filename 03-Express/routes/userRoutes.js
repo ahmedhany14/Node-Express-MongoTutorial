@@ -12,6 +12,9 @@ router.route('/login')
 router.route('/forgetpass')
     .post(auth.forgetpassword)
 
+router.route('/reset/:token')
+    .post(auth.resetPassword)
+
 
 router.route('/')
     .get(controller.GetAllUsers)
