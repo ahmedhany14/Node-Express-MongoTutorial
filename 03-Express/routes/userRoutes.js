@@ -10,16 +10,13 @@ router.route('/login')
     .post(auth.login)
 
 router.route('/forgetpass')
-    .post(auth.forgetpassword)
+    .post(auth.protect, auth.forgetpassword)
 
 router.route('/reset/:token')
     .post(auth.resetPassword)
 
 router.route('/change-password')
-    .post(
-        auth.protect,
-        auth.updatePassword
-    )
+    .post(auth.protect, auth.updatePassword)
 
 router.route('/')
     .get(controller.GetAllUsers)

@@ -8,25 +8,27 @@ const sendEmail = require('./../Utils/email.js')
 const crypto = require('crypto')
 const {response} = require("express");
 
+const createNewToken = async (user, statusCode, response) => {
+    const token = await token_sign(user._id)
+    response.status(201).json({
+        status: 'success', token: token, message: user
+    });
+}
+
 const token_sign = async function (id) {
     return await jwt.sign({id}, process.env.JWT_Secret, {
         expiresIn: process.env.JWT_expired
     })
 }
 
-exports.signUp = catchAsyncErrors(async (request, responce, next) => {
+exports.signUp = catchAsyncErrors(async (request, response, next) => {
 
     const user = await users.create(request.body);
-
-    const token = await token_sign(user._id)
-
-    responce.status(201).json({
-        status: 'succes', token: token, message: user
-    });
+    await createNewToken(user, 201, response)
 })
 
 
-exports.login = catchAsyncErrors(async (request, responce, next) => {
+exports.login = catchAsyncErrors(async (request, response, next) => {
     const {email, password} = request.body;
 
     if (!email || !password) {
@@ -40,12 +42,8 @@ exports.login = catchAsyncErrors(async (request, responce, next) => {
     if (!user || !is_correct_password) {
         return next(new AppError('Please provide a correct password and email', 401))
     }
+    await createNewToken(user, 201, response)
 
-    const token = await token_sign(user._id)
-
-    responce.status(201).json({
-        status: 'succes', token: token, message: user
-    })
 })
 
 
@@ -137,7 +135,7 @@ The nature team`;
 
 }
 
-exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
+exports.resetPassword = catchAsyncErrors(async (req, response, next) => {
     // 1) get user form the token
 
     const token = req.params.token;
@@ -161,15 +159,11 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
     await user.save();
 
     // 4) log the user in the app
-    const new_token = await token_sign(user._id)
-
-    res.status(201).json({
-        status: 'success', token: new_token, message: user
-    });
+    await createNewToken(user, 201, response)
 })
 
 
-exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
+exports.updatePassword = catchAsyncErrors(async (req, response, next) => {
 
     // 1) Check id user is existed
     const id = req.user._id;
@@ -189,9 +183,6 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
     await user.save();
 
     // 4) log in with new token
-    const new_token = await token_sign(user._id)
-    res.status(201).json({
-        status: 'success', new_token: new_token, message: user
-    });
+    await createNewToken(user, 201, response)
 
 })
