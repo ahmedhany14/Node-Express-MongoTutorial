@@ -10,6 +10,14 @@ const {response} = require("express");
 
 const createNewToken = async (user, statusCode, response) => {
     const token = await token_sign(user._id)
+
+    const cookiesOptions = {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * process.env.COOKIE_EXPIRES_IN), httpOnly: true
+    }
+    if (process.env.NODE_ENV == 'production') cookiesOptions.secure = true
+    response.cookie('jwt', token, cookiesOptions)
+
+    user.password = undefined;
     response.status(201).json({
         status: 'success', token: token, message: user
     });
