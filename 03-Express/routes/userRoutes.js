@@ -15,6 +15,9 @@ router.route('/forgetpass')
 router.route('/reset/:token')
     .post(auth.resetPassword)
 
+router.route('/profile')
+    .post(auth.protect, controller.updateMe)
+
 router.route('/change-password')
     .post(auth.protect, auth.updatePassword)
 

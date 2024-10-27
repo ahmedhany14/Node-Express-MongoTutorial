@@ -1,5 +1,9 @@
 const catchAsyncErrors = require("./../Utils/catchError")
+const AppError = require('./../Utils/appErros')
 const Users = require("./../model/userModel")
+const {request, response} = require("express");
+const {promisify} = require("util");
+const jwt = require("jsonwebtoken");
 
 // user api functions
 exports.GetAllUsers = catchAsyncErrors(async (request, responce, next) => {
@@ -12,6 +16,30 @@ exports.GetAllUsers = catchAsyncErrors(async (request, responce, next) => {
         }
     });
 })
+
+exports.updateMe = catchAsyncErrors(async (request, response, next) => {
+    // this function will only allow the user to update his name and his email.
+    const {name, email} = request.body;
+
+    // 1) check if name and email is not empty
+    if (!name || !email) return next(new AppError('Please fill name and email', 401))
+
+    // 2) check email not used before
+    // if there is any problem with validators this will return error
+    const id = request.user._id;
+    const user = await Users.findByIdAndUpdate(
+        id,
+        {name: name, email: email},
+        {new: true, runValidators: true})
+    request.user = user;
+
+    // 3) success message
+    response.status(200).json({
+        status: "success",
+        user
+    })
+})
+
 
 exports.GetUser = (request, responce) => {
     responce.status(404).json({
