@@ -10,8 +10,7 @@ exports.GetAllUsers = catchAsyncErrors(async (request, responce, next) => {
     const users = await Users.find()
 
     responce.status(200).json({
-        status: 'ok',
-        data: {
+        status: 'ok', data: {
             users: users
         }
     });
@@ -27,44 +26,47 @@ exports.updateMe = catchAsyncErrors(async (request, response, next) => {
     // 2) check email not used before
     // if there is any problem with validators this will return error
     const id = request.user._id;
-    const user = await Users.findByIdAndUpdate(
-        id,
-        {name: name, email: email},
-        {new: true, runValidators: true})
+    const user = await Users.findByIdAndUpdate(id, {name: name, email: email}, {new: true, runValidators: true})
     request.user = user;
 
     // 3) success message
     response.status(200).json({
-        status: "success",
-        user
+        status: "success", user
     })
 })
 
+exports.deActivateUser = catchAsyncErrors(async (request, response, next) => {
+    const id = request.user._id;
+    request.user = await Users.findByIdAndUpdate(id, {active: false}, {
+        new: true, runValidators: true
+    })
+
+    // 3) success message
+    response.status(200).json({
+        status: "success", data: null
+    })
+})
 
 exports.GetUser = (request, responce) => {
     responce.status(404).json({
-        status: 'error',
-        message: 'Not implemented yet'
+        status: 'error', message: 'Not implemented yet'
     });
 }
 
 exports.CreateUser = (request, responce) => {
     responce.status(404).json({
-        status: 'error',
-        message: 'Not implemented yet'
+        status: 'error', message: 'Not implemented yet'
     });
 }
 
 exports.UpdateUser = (request, responce) => {
     responce.status(404).json({
-        status: 'error',
-        message: 'Not implemented yet'
+        status: 'error', message: 'Not implemented yet'
     });
 }
 
 exports.DeleteUser = (request, responce) => {
     responce.status(404).json({
-        status: 'error',
-        message: 'Not implemented yet'
+        status: 'error', message: 'Not implemented yet'
     });
 }
