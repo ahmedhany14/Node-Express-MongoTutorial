@@ -42,6 +42,10 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
+userSchema.pre(/^find/, async function (next) {
+    this.find({active: {$ne: false}});
+    next();
+})
 userSchema.pre('save', function (next) {
     // for assign the time of modifying the password
     if (!this.isModified('password') || this.isNew) return next();
