@@ -157,7 +157,7 @@ tourSchema.post('save', function (doc, next) {
 
 tourSchema.pre(/^find/, function (next) {
     console.log('first find mw');
-    this.find();
+    //this.find();
     next();
 })
 
@@ -169,7 +169,10 @@ tourSchema.pre(/^find/, function (next) {
     this.startQuery = Date.now();
     this.find({
         secretTour: {$ne: true}
-    })
+    }).populate({
+        path: 'guides',
+        select: "-__v -passwordChangedAt"
+    });
     next();
 })
 
