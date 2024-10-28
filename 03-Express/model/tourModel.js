@@ -98,7 +98,12 @@ const tourSchema = new mongoose.Schema(
             description: String,
             day: Number
         }],
-        guides: Array
+        guides: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: "users"
+            }
+        ]
     },
     // to apply the virtual properties, we need to make it true in the schema
     {
@@ -128,11 +133,11 @@ tourSchema.pre('save', function (next) {
     next();
 })
 
-tourSchema.pre('save', async function (next) {
+/*tourSchema.pre('save', async function (next) {
     const guides = this.guides.map(async user => await users.findById(user))
     this.guides = await Promise.all(guides);
     next();
-})
+})*/
 
 tourSchema.pre('save', function (next) {
     console.log('second middleware');
