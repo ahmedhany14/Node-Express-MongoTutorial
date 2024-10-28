@@ -75,12 +75,33 @@ const tourSchema = new mongoose.Schema(
             type: Date,
             default: Date.now(),
         },
-        startDates: [Date]
+        startDates: [Date],
+        startLocation: {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String
+        },
+        locations: [{
+            type: {
+                type: String,
+                default: 'Point',
+                enum: ['Point']
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }]
     },
     // to apply the virtual properties, we need to make it true in the schema
     {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
+        toJSON: {virtuals: true},
+        toObject: {virtuals: true},
 
     }
 );
@@ -101,7 +122,7 @@ tourSchema.pre('save', function (next) {
     console.log('first middleware');
     // constains the created docu
     //console.log(this)
-    this.name_slug = slugify(this.name, { lower: true })
+    this.name_slug = slugify(this.name, {lower: true})
     next();
 })
 
@@ -134,7 +155,7 @@ tourSchema.pre(/^find/, function (next) {
 
     this.startQuery = Date.now();
     this.find({
-        secretTour: { $ne: true }
+        secretTour: {$ne: true}
     })
     next();
 })
@@ -154,7 +175,7 @@ tourSchema.post(/^find/, function (doc, next) {
 // filter query from the secret tours
 tourSchema.pre('aggregate', function (next) {
     this.pipeline().unshift(
-        { $match: { secretTour: { $ne: true } } }
+        {$match: {secretTour: {$ne: true}}}
     );
     console.log(this.pipeline());
     next();
