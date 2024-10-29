@@ -18,3 +18,15 @@ exports.writeReview = catchAsync(async (request, resonse, next) => {
         new_review
     })
 })
+
+
+
+exports.getReviews = catchAsync(async (request, resonse, next) => {
+    const tour_reviews = await reviews.find({ tourId: request.params.id })
+
+    resonse.status(200).json({
+        message: "ok",
+        tour_reviews
+    })
+
+})
