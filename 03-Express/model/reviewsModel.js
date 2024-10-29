@@ -9,7 +9,7 @@ const reviewSchema = new mongoose.Schema({
         }, userId: {
             type: mongoose.Schema.ObjectId, ref: "users", required: [true, 'please provide a user id']
         }, tourId: {
-            type: mongoose.Schema.ObjectId, ref: 'tours', required: [true, 'please provide a tour id']
+            type: mongoose.Schema.ObjectId, ref: 'Tour', required: [true, 'please provide a tour id']
         }
     }, // to apply the virtual properties, we need to make it true in the schema
     {
