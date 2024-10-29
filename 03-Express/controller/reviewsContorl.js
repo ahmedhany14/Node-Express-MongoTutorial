@@ -23,7 +23,7 @@ exports.writeReview = catchAsync(async (request, resonse, next) => {
 
 
 exports.getReviews = catchAsync(async (request, resonse, next) => {
-    console.log('sss')
+
     const tour_reviews = await reviews.find({ tourId: request.params.id });
 
     resonse.status(200).json({
