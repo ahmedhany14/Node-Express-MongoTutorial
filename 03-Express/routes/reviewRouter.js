@@ -1,10 +1,10 @@
 const express = require('express')
 const { writeReview, getReviews } = require('./../controller/reviewsContorl')
 const { protect, Permission } = require('./../controller/authContoller')
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 
-router.route('/:id')
+router.route('/')
     .post(protect, writeReview)
     .get(protect, Permission('user'), getReviews)
 
