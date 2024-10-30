@@ -9,7 +9,6 @@ const router = express.Router();
 // middleware for checking id
 
 //router.param('id', controller.checkID_MW);
-router.use('/:id/reviews', reviewRouter)
 
 router.route('/')
     .get(protect, controller.GetAllTouts)
@@ -43,6 +42,7 @@ router.route('/:id/reviews')
 */
 
 // we can use this way to use the nested route
+router.use('/:id/reviews', reviewRouter)
 
 
 module.exports = router;
