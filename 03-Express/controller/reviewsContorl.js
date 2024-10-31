@@ -33,17 +33,5 @@ exports.getReviews = catchAsync(async (request, resonse, next) => {
 
 })
 
-exports.deleteReview = factory.deleteOne(reviews)
-
-catchAsync(async (request, resonse, next) => {
-
-    const id = request.params.reviewid;
-    console.log('review id', id)
-    const deletedReview = await reviews.deleteOne({ '_id': id }, { new: true });
-
-    resonse.status(200).json({
-        status: 'ok',
-        message: 'review deleted',
-        deletedReview
-    })
-})
+exports.updateReview = factory.updateOne(reviews);
+exports.deleteReview = factory.deleteOne(reviews);

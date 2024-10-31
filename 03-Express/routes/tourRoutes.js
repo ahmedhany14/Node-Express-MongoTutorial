@@ -22,7 +22,11 @@ router.route('/monthly-plan/:year')
 
 router.route('/:id')
     .get(controller.GetTour)
-    .patch(controller.UpdateTour)
+    .patch(
+        protect,
+        Permission('admin', 'lead-guide'),
+        controller.UpdateTour
+    )
     .delete(
         protect,
         Permission('admin', 'lead-guide'),

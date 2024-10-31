@@ -52,23 +52,7 @@ exports.CreateTour = catchAsyncErrors(async (request, response, next) => {
     })
 });
 
-exports.UpdateTour = catchAsyncErrors(async (request, response, next) => {
-
-    let id = request.params.id;
-    const new_tour = await Tour.findByIdAndUpdate(id, request.body, { new: true })
-
-    if (tour == null) {
-        return next(new AppError(`No tour founded for the id: ${id}`, 404))
-    }
-
-
-    response.status(200).json({
-        status: 'ok', data: {
-            tour: new_tour
-        }
-    })
-});
-
+exports.UpdateTour = factory.updateOne(Tour);
 exports.DeleteTour = factory.deleteOne(Tour);
 
 
