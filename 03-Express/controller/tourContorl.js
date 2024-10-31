@@ -2,7 +2,7 @@ const Tour = require('./../model/tourModel')
 const ApiFeature = require('./../Utils/apiFeatures')
 const AppError = require('./../Utils/appErros.js')
 const catchAsyncErrors = require('./../Utils/catchError.js')
-
+const factory = require('./factoryHandler.js')
 
 exports.GetAllTouts = catchAsyncErrors(async (request, response, next) => {
 
@@ -55,7 +55,7 @@ exports.CreateTour = catchAsyncErrors(async (request, response, next) => {
 exports.UpdateTour = catchAsyncErrors(async (request, response, next) => {
 
     let id = request.params.id;
-    const new_tour = await Tour.findByIdAndUpdate(id, request.body, {new: true})
+    const new_tour = await Tour.findByIdAndUpdate(id, request.body, { new: true })
 
     if (tour == null) {
         return next(new AppError(`No tour founded for the id: ${id}`, 404))
@@ -69,35 +69,25 @@ exports.UpdateTour = catchAsyncErrors(async (request, response, next) => {
     })
 });
 
-exports.DeleteTour = catchAsyncErrors(async (request, response, next) => {
-    const tour = await Tour.findByIdAndDelete(request.params.id, request.body, {new: true})
-
-    if (tour == null) {
-        return next(new AppError(`No tour founded for the id: ${id}`, 404))
-    }
-
-    response.status(200).json({
-        status: 'ok',
-    })
-});
+exports.DeleteTour = factory.deleteOne(Tour);
 
 
 exports.GetTourDetail = catchAsyncErrors(async (request, response, next) => {
     const stats = await Tour.aggregate([{
-        $match: {ratingsAverage: {$gte: 4.5}}
+        $match: { ratingsAverage: { $gte: 4.5 } }
     }, {
         $group: {
-            _id: {$toUpper: '$difficulty'},
-            numTours: {$sum: 1},
-            numRatings: {$sum: '$ratingsQuantity'},
-            avgRate: {$avg: '$ratingsAverage'},
-            avgPrice: {$avg: '$price'},
-            sumPrice: {$sum: '$price'},
-            minPrice: {$min: '$price'},
-            maxPrice: {$max: '$price'},
+            _id: { $toUpper: '$difficulty' },
+            numTours: { $sum: 1 },
+            numRatings: { $sum: '$ratingsQuantity' },
+            avgRate: { $avg: '$ratingsAverage' },
+            avgPrice: { $avg: '$price' },
+            sumPrice: { $sum: '$price' },
+            minPrice: { $min: '$price' },
+            maxPrice: { $max: '$price' },
         }
     }, {
-        $match: {_id: {$ne: 'EASY'}}
+        $match: { _id: { $ne: 'EASY' } }
     }
 
     ])
@@ -113,7 +103,7 @@ exports.GetMonthlyPlan = catchAsyncErrors(async (request, response, next) => {
 
     const year = request.params.year;
 
-    const plan = await Tour.aggregate([{$unwind: "$startDates"}, {
+    const plan = await Tour.aggregate([{ $unwind: "$startDates" }, {
         $match: {
             startDates: {
                 $gte: new Date(`${year}-01-01`), $lte: new Date(`${year}-12-31`),
@@ -121,7 +111,7 @@ exports.GetMonthlyPlan = catchAsyncErrors(async (request, response, next) => {
         }
     }, {
         $group: {
-            '_id': {$month: '$startDates'}, numTours: {$sum: 1}, tours: {$push: '$name'}
+            '_id': { $month: '$startDates' }, numTours: { $sum: 1 }, tours: { $push: '$name' }
         }
     }, {
         $addFields: {

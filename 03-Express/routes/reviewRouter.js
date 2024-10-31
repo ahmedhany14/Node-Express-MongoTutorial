@@ -8,7 +8,7 @@ router.route('/')
     .post(protect, writeReview)
     .get(protect, Permission('user'), getReviews)
 
-router.route('/:reviewid')
+router.route('/:id')
     .delete(protect, deleteReview)
 
 module.exports = router

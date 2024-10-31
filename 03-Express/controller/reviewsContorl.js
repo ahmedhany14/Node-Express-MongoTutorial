@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const catchAsync = require('./../Utils/catchError')
 const reviews = require('./../model/reviewsModel')
-
+const factory = require('./factoryHandler')
 
 exports.writeReview = catchAsync(async (request, resonse, next) => {
 
@@ -33,7 +33,9 @@ exports.getReviews = catchAsync(async (request, resonse, next) => {
 
 })
 
-exports.deleteReview = catchAsync(async (request, resonse, next) => {
+exports.deleteReview = factory.deleteOne(reviews)
+
+catchAsync(async (request, resonse, next) => {
 
     const id = request.params.reviewid;
     console.log('review id', id)
