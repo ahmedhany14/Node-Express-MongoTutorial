@@ -1,5 +1,5 @@
 const express = require('express');
-const controller = require('../controller/tourContorl');
+const { GetAllTouts, CreateTour, GetTourDetail, GetMonthlyPlan, GetTour, UpdateTour, DeleteTour } = require('../controller/tourContorl');
 const { protect, Permission } = require('./../controller/authContoller')
 const reviewRouter = require('./reviewRouter')
 const router = express.Router();
@@ -10,34 +10,34 @@ const router = express.Router();
 //router.param('id', controller.checkID_MW);
 
 router.route('/')
-    .get(controller.GetAllTouts)
+    .get(GetAllTouts)
     .post(
         protect,
         Permission('admin', 'lead-guid'),
-        controller.CreateTour
+        CreateTour
     );
 
 router.route('/tour-states')
-    .get(controller.GetTourDetail)
+    .get(GetTourDetail)
 
 router.route('/monthly-plan/:year')
     .get(
         protect,
         Permission('admin', 'lead-guide', "guide"),
-        controller.GetMonthlyPlan
+        GetMonthlyPlan
     );
 
 router.route('/:id')
-    .get(controller.GetTour)
+    .get(GetTour)
     .patch(
         protect,
         Permission('admin', 'lead-guide'),
-        controller.UpdateTour
+        UpdateTour
     )
     .delete(
         protect,
         Permission('admin', 'lead-guide'),
-        controller.DeleteTour
+        DeleteTour
     );
 
 /*
