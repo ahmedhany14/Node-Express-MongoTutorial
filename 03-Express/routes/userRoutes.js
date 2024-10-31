@@ -1,35 +1,32 @@
 const express = require('express');
-const controller = require('../controller/userContorl');
-const auth = require('./../controller/authContoller')
+const {  GetAllUsers, CreateUser, DeleteUser, UpdateUser, updateMe, deActivateUser, GetUser } = require('../controller/userContorl');
+const { protect, resetPassword, forgetpassword, signUp, login, updatePassword, Permission } = require('./../controller/authContoller')
 const router = express.Router();
 
-router.route('/signup')
-    .post(auth.signUp)
+router.route('/signup').post(signUp)
+router.route('/login').post(login)
 
-router.route('/login')
-    .post(auth.login)
 
-router.route('/forgetpass')
-    .post(auth.protect, auth.forgetpassword)
+router.route('/reset/:token').post(resetPassword)
 
-router.route('/reset/:token')
-    .post(auth.resetPassword)
+// protected routes 
+router.use(protect) // all routes comes after it will be protected
+router.route('/forgetpass').post(forgetpassword)
+router.route('/profile/change-data').post(updateMe)
+router.route('/profile/active').post(deActivateUser)
+router.route('/change-password').post(updatePassword)
 
-router.route('/profile/change-data')
-    .post(auth.protect, controller.updateMe)
+// this routs only for admins
 
-router.route('/profile/active')
-    .post(auth.protect, controller.deActivateUser)
-
-router.route('/change-password')
-    .post(auth.protect, auth.updatePassword)
-
+router.use(Permission('admin'))
 router.route('/')
-    .get(controller.GetAllUsers)
-    .post(controller.CreateUser);
+    .get(GetAllUsers)
+    .post(CreateUser);
+
 router.route('/:id')
-    .get(controller.GetUser)
-    .delete(controller.DeleteUser)
-    .patch(controller.UpdateUser);
+    .get(GetUser)
+    .delete(DeleteUser)
+    .patch(UpdateUser);
+
 
 module.exports = router;
