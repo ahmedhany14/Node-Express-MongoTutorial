@@ -53,11 +53,6 @@ exports.GetUser = (request, responce) => {
     });
 }
 
-exports.CreateUser = (request, responce) => {
-    responce.status(404).json({
-        status: 'error', message: 'Not implemented yet'
-    });
-}
-
+exports.CreateUser = factory.create(Users);
 exports.UpdateUser = factory.updateOne(Users)
 exports.DeleteUser = factory.deleteOne(Users);

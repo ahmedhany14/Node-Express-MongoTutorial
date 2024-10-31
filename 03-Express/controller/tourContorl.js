@@ -1,3 +1,4 @@
+const { Model } = require('mongoose')
 const Tour = require('./../model/tourModel')
 const ApiFeature = require('./../Utils/apiFeatures')
 const AppError = require('./../Utils/appErros.js')
@@ -42,16 +43,7 @@ exports.GetTour = catchAsyncErrors(async (request, response, next) => {
     });
 });
 
-exports.CreateTour = catchAsyncErrors(async (request, response, next) => {
-    // to get the data user sent, we use request.body
-    const new_tour = await Tour.create(request.body)
-    response.status(201).json({
-        status: 'success', data: {
-            tour: new_tour
-        }
-    })
-});
-
+exports.CreateTour = factory.create(Tour);
 exports.UpdateTour = factory.updateOne(Tour);
 exports.DeleteTour = factory.deleteOne(Tour);
 

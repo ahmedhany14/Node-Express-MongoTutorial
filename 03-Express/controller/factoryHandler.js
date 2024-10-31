@@ -31,3 +31,14 @@ exports.updateOne = Model =>
             }
         })
     });
+
+exports.create = Model =>
+    catchAsync(async (request, response, next) => {
+        const document = await Model.create(request.body)
+
+        response.status(201).json({
+            status: 'success', data: {
+                tour: document
+            }
+        });
+    })

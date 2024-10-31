@@ -3,30 +3,21 @@ const catchAsync = require('./../Utils/catchError')
 const reviews = require('./../model/reviewsModel')
 const factory = require('./factoryHandler')
 
-exports.writeReview = catchAsync(async (request, resonse, next) => {
 
-    const new_review = {
-        review: request.body.review,
-        rating: request.body.rating,
-        createdAt: Date.now(),
-        userId: request.user.id,
-        tourId: request.params.id
-    }
-    await reviews.create(new_review);
+exports.setUpBodyForCreateNewReview = (request, response, next) => {
+    request.body.userId = request.user.id;
+    request.body.tourId = request.params.id;
+    next();
+};
 
-    resonse.status(200).json({
-        message: "ok",
-        new_review
-    })
-})
+exports.writeReview = factory.create(reviews);
 
 
-
-exports.getReviews = catchAsync(async (request, resonse, next) => {
+exports.getReviews = catchAsync(async (request, response, next) => {
 
     const tour_reviews = await reviews.find({ tourId: request.params.id });
 
-    resonse.status(200).json({
+    response.status(200).json({
         message: "ok",
         tour_reviews
     })
