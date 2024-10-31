@@ -6,8 +6,6 @@ const catchAsyncErrors = require('./../Utils/catchError.js')
 const factory = require('./factoryHandler.js')
 
 exports.GetAllTouts = factory.getAll(Tour)
-
-
 exports.GetTour = factory.getOne(Tour, { path: 'guides' });
 exports.CreateTour = factory.create(Tour);
 exports.UpdateTour = factory.updateOne(Tour);
