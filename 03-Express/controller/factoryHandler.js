@@ -71,7 +71,7 @@ exports.getAll = (Model) =>
         const feature = new ApiFeature(Model.find(filter), request.query).filter().sort().limitRes().limitFields().pagination();
         const document = await feature.query;
 
-        response.status(200).json({
+        response.status(200).json({  
             status: 'success', results: document.length, data: {
                 document
             }

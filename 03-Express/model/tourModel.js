@@ -107,11 +107,21 @@ const tourSchema = new mongoose.Schema(
     },
     // to apply the virtual properties, we need to make it true in the schema
     {
-        toJSON: {virtuals: true},
-        toObject: {virtuals: true},
-
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     }
 );
+
+// index
+/*
+when we have a lot of data, we can use index to make the search faster
+the data that we will search for it, we can make it index to make the search faster
+*/
+// 1 for ascending order, -1 for descending order
+tourSchema.index({ price: 1 })
+tourSchema.index({ price: 1, ratingsAverage: -1 })
+tourSchema.index({ ratingsAverage: -1 })
+tourSchema.index({ name_slug: 1 })
 
 // virtual properties: is a property that we can define on our schema but that will not be persisted to the database, to save space in the database
 /*
@@ -129,7 +139,7 @@ tourSchema.pre('save', function (next) {
     console.log('first middleware');
     // constains the created docu
     //console.log(this)
-    this.name_slug = slugify(this.name, {lower: true})
+    this.name_slug = slugify(this.name, { lower: true })
     next();
 })
 
@@ -168,7 +178,7 @@ tourSchema.pre(/^find/, function (next) {
 
     this.startQuery = Date.now();
     this.find({
-        secretTour: {$ne: true}
+        secretTour: { $ne: true }
     }).populate({
         path: 'guides',
         select: "-__v -passwordChangedAt"
@@ -191,7 +201,7 @@ tourSchema.post(/^find/, function (doc, next) {
 // filter query from the secret tours
 tourSchema.pre('aggregate', function (next) {
     this.pipeline().unshift(
-        {$match: {secretTour: {$ne: true}}}
+        { $match: { secretTour: { $ne: true } } }
     );
     console.log(this.pipeline());
     next();
