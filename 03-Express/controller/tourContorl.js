@@ -5,44 +5,10 @@ const AppError = require('./../Utils/appErros.js')
 const catchAsyncErrors = require('./../Utils/catchError.js')
 const factory = require('./factoryHandler.js')
 
-exports.GetAllTouts = catchAsyncErrors(async (request, response, next) => {
+exports.GetAllTouts = factory.getAll(Tour)
 
-    const feature = new ApiFeature(Tour.find(), request.query).filter().sort().limitRes().limitFields().pagination();
-    const tour = await feature.query;
 
-    response.status(200).json({
-        status: 'success', results: tour.length, data: {
-            tours: tour
-        }
-    })
-});
-
-// get a specific tour by id
-/*
-to make a parameter in the URL, we use : before the parameter name
-to make the parameter optional, we use ? after the parameter name
-to get the parameter value, we use request.params and from it we can get the parameter value
-*/
-exports.GetTour = catchAsyncErrors(async (request, response, next) => {
-    const id = request.params.id;
-    /*
-    populate is used to get the data of the referenced collection, and we can specify the fields we want to get
-    it will query the collection with the id we have, and get the data of the referenced collection
-     */
-    const tour = await Tour.findById(id);
-    // Tour.findOne({_id: id});
-
-    if (tour == null) {
-        return next(new AppError(`No tour founded for the id: ${id}`, 404))
-    }
-
-    response.status(200).json({
-        status: 'success', data: {
-            tour: tour
-        }
-    });
-});
-
+exports.GetTour = factory.getOne(Tour, { path: 'guides' });
 exports.CreateTour = factory.create(Tour);
 exports.UpdateTour = factory.updateOne(Tour);
 exports.DeleteTour = factory.deleteOne(Tour);

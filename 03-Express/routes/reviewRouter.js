@@ -6,7 +6,7 @@ const router = express.Router({ mergeParams: true });
 
 router.route('/')
     .post(protect, setUpBodyForCreateNewReview, writeReview)
-    .get(protect, Permission('user'), getReviews)
+    .get(protect, Permission('admin'), getReviews)
 
 router.route('/:id')
     .delete(protect, deleteReview)

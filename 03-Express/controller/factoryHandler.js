@@ -1,5 +1,6 @@
 const catchAsync = require('./../Utils/catchError')
-const AppError = require('./../Utils/appErros')
+const AppError = require('./../Utils/appErros');
+const ApiFeature = require('./../Utils/apiFeatures')
 
 exports.deleteOne = Model =>
     catchAsync(async (request, response, next) => {
@@ -42,3 +43,37 @@ exports.create = Model =>
             }
         });
     })
+
+exports.getOne = (Model, populateOptions) =>
+
+    catchAsync(async (request, response, next) => {
+        const id = request.params.id;
+
+        let query = Model.findById(id);
+        if (populateOptions) query = query.populate(populateOptions);
+        const document = await query;
+
+        if (document == null) return next(new AppError(`No tour founded for the id: ${id}`, 404))
+
+        response.status(200).json({
+            status: 'success', data: {
+                document
+            }
+        });
+    });
+
+exports.getAll = (Model) =>
+    catchAsync(async (request, response, next) => {
+
+        let filter = {}
+        if (request.params.id) filter = { tourId: request.params.id };
+
+        const feature = new ApiFeature(Model.find(filter), request.query).filter().sort().limitRes().limitFields().pagination();
+        const document = await feature.query;
+
+        response.status(200).json({
+            status: 'success', results: document.length, data: {
+                document
+            }
+        })
+    });

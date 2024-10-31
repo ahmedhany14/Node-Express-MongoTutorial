@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const catchAsync = require('./../Utils/catchError')
 const reviews = require('./../model/reviewsModel')
 const factory = require('./factoryHandler')
 
@@ -13,7 +12,9 @@ exports.setUpBodyForCreateNewReview = (request, response, next) => {
 exports.writeReview = factory.create(reviews);
 
 
-exports.getReviews = catchAsync(async (request, response, next) => {
+exports.getReviews = factory.getAll(reviews)
+
+/*catchAsync(async (request, response, next) => {
 
     const tour_reviews = await reviews.find({ tourId: request.params.id });
 
@@ -22,7 +23,7 @@ exports.getReviews = catchAsync(async (request, response, next) => {
         tour_reviews
     })
 
-})
+})*/
 
 exports.updateReview = factory.updateOne(reviews);
 exports.deleteReview = factory.deleteOne(reviews);
