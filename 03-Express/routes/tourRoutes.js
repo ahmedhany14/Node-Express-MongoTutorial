@@ -7,7 +7,8 @@ const {
     GetTour,
     UpdateTour,
     DeleteTour,
-    nearestTours
+    nearestTours,
+    distanceTours
 } = require('../controller/tourContorl');
 const {protect, Permission} = require('./../controller/authContoller')
 const reviewRouter = require('./reviewRouter')
@@ -51,6 +52,10 @@ router.route('/:id')
 
 router.route('/tour-within/distance/:dis/coordinates/:coor/unit/:uni')
     .get(nearestTours)
+
+router.route('/tour-distance/coordinates/:coor/unit/:uni')
+    .get(distanceTours)
+
 /*
 // This is nested route, where we get the reviews of the tour
 

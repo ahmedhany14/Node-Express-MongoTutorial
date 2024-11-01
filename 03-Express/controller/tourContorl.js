@@ -78,9 +78,11 @@ exports.nearestTours = catchAsyncErrors(async (request, response, next) => {
     const {dis, coor, uni} = request.params;
     const [lat, lng] = coor.split(',');
 
+    if (!dis || !lat || !lng || !uni) {
+        return next(new AppError('Provide a correct data ya kosomak', 400))
+    }
     const radius = uni === 'mi' ? dis / 3963.2 : dis / 6378.1;
 
-    console.log(radius, lng, lat, uni)
     const filter = {
         'startLocation.coordinates': {
             $geoWithin: {
@@ -89,6 +91,42 @@ exports.nearestTours = catchAsyncErrors(async (request, response, next) => {
         }
     }
     const tours = await Tour.find(filter);
+
+    response.status(200).json({
+        status: "ok",
+        length: tours.length,
+        tours
+    })
+});
+
+exports.distanceTours = catchAsyncErrors(async (request, response, next) => {
+    const {coor, uni} = request.params;
+    const [lat, lng] = coor.split(',');
+
+    if (!lat || !lng || !uni) {
+        return next(new AppError('Provide a correct data ya kosomak', 400))
+    }
+    const multi = uni === 'mi' ? .000621371 : .001;
+
+    const pipline = [
+        {
+            $geoNear: {
+                near: {
+                    type: 'Point',
+                    coordinates: [+lng, +lat]
+                },
+                distanceField: `distance`,
+                distanceMultiplier: multi
+            }
+        },
+        {
+            $project: {
+                name: 1,
+                distance: 1
+            }
+        }
+    ];
+    const tours = await Tour.aggregate(pipline)
 
     response.status(200).json({
         status: "ok",
