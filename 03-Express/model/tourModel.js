@@ -123,7 +123,7 @@ tourSchema.index({price: 1})
 tourSchema.index({price: 1, ratingsAverage: -1})
 tourSchema.index({ratingsAverage: -1})
 tourSchema.index({name_slug: 1})
-
+tourSchema.index({startLocation: '2dsphere'});
 // virtual properties: is a property that we can define on our schema but that will not be persisted to the database, to save space in the database
 /*
 For example, we want to calculate the duration weeks based on the duration days

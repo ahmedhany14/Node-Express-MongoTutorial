@@ -1,6 +1,15 @@
 const express = require('express');
-const { GetAllTouts, CreateTour, GetTourDetail, GetMonthlyPlan, GetTour, UpdateTour, DeleteTour } = require('../controller/tourContorl');
-const { protect, Permission } = require('./../controller/authContoller')
+const {
+    GetAllTouts,
+    CreateTour,
+    GetTourDetail,
+    GetMonthlyPlan,
+    GetTour,
+    UpdateTour,
+    DeleteTour,
+    nearestTours
+} = require('../controller/tourContorl');
+const {protect, Permission} = require('./../controller/authContoller')
 const reviewRouter = require('./reviewRouter')
 const router = express.Router();
 
@@ -40,6 +49,8 @@ router.route('/:id')
         DeleteTour
     );
 
+router.route('/tour-within/distance/:dis/coordinates/:coor/unit/:uni')
+    .get(nearestTours)
 /*
 // This is nested route, where we get the reviews of the tour
 
