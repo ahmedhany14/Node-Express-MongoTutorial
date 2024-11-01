@@ -19,6 +19,9 @@ const reviewSchema = new mongoose.Schema({
         toJSON: { virtuals: true }, toObject: { virtuals: true },
     });
 
+// this index will not all users to add multiple reviews on the same tour
+reviewSchema.index({ tourId: 1, userId: 1 }, { unique: true });
+
 reviewSchema.pre(/^find/, function (next) {
 
     this.populate({

@@ -38,7 +38,8 @@ const tourSchema = new mongoose.Schema(
             type: Number,
             default: 4.5,
             min: [1, 'Rating must be above 1.0'],
-            max: [5, 'Rating must be below 5.0']
+            max: [5, 'Rating must be below 5.0'],
+            set: val => Math.round(val * 10) / 10
         },
         ratingsQuantity: {
             type: Number,
@@ -107,8 +108,8 @@ const tourSchema = new mongoose.Schema(
     },
     // to apply the virtual properties, we need to make it true in the schema
     {
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
+        toJSON: {virtuals: true},
+        toObject: {virtuals: true},
     }
 );
 
@@ -118,10 +119,10 @@ when we have a lot of data, we can use index to make the search faster
 the data that we will search for it, we can make it index to make the search faster
 */
 // 1 for ascending order, -1 for descending order
-tourSchema.index({ price: 1 })
-tourSchema.index({ price: 1, ratingsAverage: -1 })
-tourSchema.index({ ratingsAverage: -1 })
-tourSchema.index({ name_slug: 1 })
+tourSchema.index({price: 1})
+tourSchema.index({price: 1, ratingsAverage: -1})
+tourSchema.index({ratingsAverage: -1})
+tourSchema.index({name_slug: 1})
 
 // virtual properties: is a property that we can define on our schema but that will not be persisted to the database, to save space in the database
 /*
@@ -132,14 +133,10 @@ tourSchema.virtual('durationinWeeks').get(function () {
     return this.duration / 7;
 });
 
-
 // Document middle ware, this middle ware called before when we create or save a new collection
 // so we can edit the document
 tourSchema.pre('save', function (next) {
-    console.log('first middleware');
-    // constains the created docu
-    //console.log(this)
-    this.name_slug = slugify(this.name, { lower: true })
+    this.name_slug = slugify(this.name, {lower: true})
     next();
 })
 
@@ -149,36 +146,10 @@ tourSchema.pre('save', function (next) {
     next();
 })*/
 
-tourSchema.pre('save', function (next) {
-    console.log('second middleware');
-    next();
-})
-
-// this middle ware called after when we create or save a new collection
-tourSchema.post('save', function (doc, next) {
-    console.log('third middleware after post');
-    next();
-})
-
-// Query middleware, we can apply middleware after queries, like find, delete and upadte..... ect
-
-
-//tourSchema.pre('find', function (doc, next) {
-
 tourSchema.pre(/^find/, function (next) {
-    console.log('first find mw');
-    //this.find();
-    next();
-})
-
-// middleware to filter the docus, that is not secret
-
-tourSchema.pre(/^find/, function (next) {
-    console.log('second find mw to filter the docs');
-
     this.startQuery = Date.now();
     this.find({
-        secretTour: { $ne: true }
+        secretTour: {$ne: true}
     }).populate({
         path: 'guides',
         select: "-__v -passwordChangedAt"
@@ -187,12 +158,9 @@ tourSchema.pre(/^find/, function (next) {
 })
 
 tourSchema.post(/^find/, function (doc, next) {
-    console.log('thirs find mw after filter the docs');
     console.log('query takes ', Date.now() - this.startQuery, ' ms')
-    if (doc)
-        console.log(doc.length)
-    else
-        console.log('nothing to display')
+    if (doc) console.log(doc.length)
+    else console.log('nothing to display')
     next();
 })
 
@@ -201,7 +169,7 @@ tourSchema.post(/^find/, function (doc, next) {
 // filter query from the secret tours
 tourSchema.pre('aggregate', function (next) {
     this.pipeline().unshift(
-        { $match: { secretTour: { $ne: true } } }
+        {$match: {secretTour: {$ne: true}}}
     );
     console.log(this.pipeline());
     next();
