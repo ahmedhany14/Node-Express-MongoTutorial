@@ -25,19 +25,19 @@ const filterMulter = (request, file, callback) => {
     file.mimetype.startsWith('image') ? callback(null, true) : callback(new AppError('Not an image! Please upload only images', 400), false)
 }
 
-exports. resizeImage = (request, response, next) => {
+exports.resizeImage = catchAsyncErrors(async (request, response, next) => {
     // define image name
     const fileName = `user-${request.user.id}-${Date.now()}.jpeg`;
 
     request.file.filename = fileName;
     // buffer is the image in the memory
-    sharp(request.file.buffer)
+    await sharp(request.file.buffer)
         .resize(500, 500)
         .toFormat('jpeg')
         .jpeg({quality: 20})
         .toFile(`public/img/users/${fileName}`)
     next();
-}
+})
 const upload = multer({
     storage: multerStorage, fileFilter: filterMulter
 })
