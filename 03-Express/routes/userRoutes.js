@@ -7,7 +7,8 @@ const {
     updateMe,
     deActivateUser,
     GetUser,
-    uploadUserPhoto
+    uploadUserPhoto,
+    resizeImage
 } = require('../controller/userContorl');
 const {
     protect,
@@ -33,7 +34,7 @@ router.route('/profile/change-data').post(updateMe)
 router.route('/profile/active').post(deActivateUser)
 router.route('/change-password').post(updatePassword)
 router.route('/updateMe')
-    .post(uploadUserPhoto, updateMe)
+    .post(uploadUserPhoto, resizeImage, updateMe)
 
 
 // this routs only for admins

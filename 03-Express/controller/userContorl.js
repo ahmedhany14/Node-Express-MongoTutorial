@@ -5,10 +5,10 @@ const {promisify} = require("util");
 const jwt = require("jsonwebtoken");
 const multer = require('multer')
 const factory = require('./factoryHandler')
-const {request} = require("express");
+const sharp = require('sharp')
 
 // the multer disk storage is used to store the file in the disk, which defines the destination and the filename of the file.
-const multerStorage = multer.diskStorage({
+/*const multerStorage = multer.diskStorage({
     destination: (request, file, callback) => { // destination is the path where the file will be stored
         callback(null, 'public/img/users')
     }, filename: (request, file, callback) => { // filename is the name of the file
@@ -16,10 +16,27 @@ const multerStorage = multer.diskStorage({
         const fileName = `user-${request.user.id}-${Date.now()}.${ext}`
         callback(null, fileName)
     }
-})
+})*/
+
+// the multer memory storage is used to store the file in the memory, which defines the destination and the filename of the file.
+const multerStorage = multer.memoryStorage();
 
 const filterMulter = (request, file, callback) => {
     file.mimetype.startsWith('image') ? callback(null, true) : callback(new AppError('Not an image! Please upload only images', 400), false)
+}
+
+exports. resizeImage = (request, response, next) => {
+    // define image name
+    const fileName = `user-${request.user.id}-${Date.now()}.jpeg`;
+
+    request.file.filename = fileName;
+    // buffer is the image in the memory
+    sharp(request.file.buffer)
+        .resize(500, 500)
+        .toFormat('jpeg')
+        .jpeg({quality: 20})
+        .toFile(`public/img/users/${fileName}`)
+    next();
 }
 const upload = multer({
     storage: multerStorage, fileFilter: filterMulter
