@@ -26,7 +26,7 @@ exports.resizeImages = catchAsyncErrors(async (request, response, next) => {
     request.body.images = [];
     await Promise.all(request.files.images.map(async (file, index) => {
         const imageFile = `tour-${request.params.id}-${Date.now()}-${index}.jpeg`;
-        await sharp(request.files.images[0].buffer)
+        await sharp(file.buffer)
             .resize(2000, 1333)
             .toFormat('jpeg')
             .jpeg({quality: 90})
