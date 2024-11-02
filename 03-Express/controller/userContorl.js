@@ -19,8 +19,7 @@ const multerStorage = multer.diskStorage({
 })
 
 const filterMulter = (request, file, callback) => {
-    file.mimetype.startsWith('image') ?
-        callback(null, true) : callback(new AppError('Not an image! Please upload only images', 400), false)
+    file.mimetype.startsWith('image') ? callback(null, true) : callback(new AppError('Not an image! Please upload only images', 400), false)
 }
 const upload = multer({
     storage: multerStorage, fileFilter: filterMulter
@@ -33,18 +32,26 @@ exports.updateMe = catchAsyncErrors(async (request, response, next) => {
     console.log(request.file)
     // 1) check if name and email is not empty
     if (request.body.password || request.body.passwordConfirm) {
-        return next(
-            new AppError(
-                'This route is not for password updates. Please use /updateMyPassword.',
-                400
-            )
-        )
+        return next(new AppError('This route is not for password updates. Please use /updateMyPassword.', 400))
     }
 
     // 2) check email not used before
     // if there is any problem with validators this will return error
+
+    const filterBody = (obj, ...allowedFields) => {
+        const newObj = {};
+        Object.keys(obj).forEach(el => {
+            if (allowedFields.includes(el)) newObj[el] = obj[el]
+        });
+        return newObj;
+    }
+
+    const filterObj = filterBody(request.body, 'name', 'email');
+    if (request.file) filterObj.photo = request.file.filename;
     const id = request.user._id;
-    const user = await Users.findByIdAndUpdate(id, request.body, {new: true, runValidators: true})
+    const user = await Users.findByIdAndUpdate(id, filterObj, {
+        new: true, runValidators: true
+    })
     request.user = user;
 
     // 3) success message

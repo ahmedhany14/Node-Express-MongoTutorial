@@ -12,7 +12,9 @@ const userSchema = new mongoose.Schema({
         validate: [validator.isEmail, 'provied a valid email']
     }, role: {
         type: String, enum: ['admin', 'user', 'lead-guide'], default: 'user'
-    }, photo: String, password: {
+    }, photo: {
+        type: String, default: "default.jpg"
+    }, password: {
         type: String,
         required: [true, 'no password enterd'],
         minlength: [8, 'the password should be at least 8 characterd'],
@@ -29,8 +31,7 @@ const userSchema = new mongoose.Schema({
         },
     },
 
-    passwordChangedAt: Date, passwordResetToken: String, passwordTokenExpire: Date,
-    active: {
+    passwordChangedAt: Date, passwordResetToken: String, passwordTokenExpire: Date, active: {
         type: Boolean, default: true, select: false
     }
 })
