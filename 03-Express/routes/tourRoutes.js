@@ -8,7 +8,9 @@ const {
     UpdateTour,
     DeleteTour,
     nearestTours,
-    distanceTours
+    distanceTours,
+    uploadImages,
+    resizeImages
 } = require('../controller/tourContorl');
 const {protect, Permission} = require('./../controller/authContoller')
 const reviewRouter = require('./reviewRouter')
@@ -42,6 +44,8 @@ router.route('/:id')
     .patch(
         protect,
         Permission('admin', 'lead-guide'),
+        uploadImages,
+        resizeImages,
         UpdateTour
     )
     .delete(

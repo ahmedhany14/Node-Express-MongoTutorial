@@ -4,6 +4,47 @@ const ApiFeature = require('./../Utils/apiFeatures')
 const AppError = require('./../Utils/appErros.js')
 const catchAsyncErrors = require('./../Utils/catchError.js')
 const factory = require('./factoryHandler.js')
+const multer = require("multer");
+const sharp = require("sharp");
+
+const multerStorage = multer.memoryStorage();
+const filterMulter = (request, file, callback) => {
+    file.mimetype.startsWith('image') ? callback(null, true) : callback(new AppError('Not an image! Please upload only images', 400), false)
+}
+exports.resizeImages = (request, response, next) => {
+
+    // image Cover
+    const coverFileName = `tour-${request.params.id}-${Date.now()}.jpeg`;
+    sharp(request.files.imageCover[0].buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({quality: 90})
+        .toFile(`public/img/tours/${coverFileName}`)
+    request.body.imageCover = coverFileName;
+
+    // images
+    request.body.images = [];
+    request.files.images.forEach((file, index) => {
+        const imageFile = `tour-${request.params.id}-${Date.now()}-${index}.jpeg`;
+        sharp(request.files.images[0].buffer)
+            .resize(2000, 1333)
+            .toFormat('jpeg')
+            .jpeg({quality: 90})
+            .toFile(`public/img/tours/${imageFile}`)
+        request.body.images.push(imageFile);
+    });
+    next();
+}
+const upload = multer({
+    storage: multerStorage, fileFilter: filterMulter
+})
+exports.uploadImages = upload.fields([// this is for single image
+    {
+        name: "imageCover",
+        maxCount: 1
+    }, // this is for multiple images, the name should be the same as the name in the schema
+    // maxCount is the number of images that can be uploaded
+    {name: "images", maxCount: 3},])
 
 exports.GetAllTouts = factory.getAll(Tour)
 exports.GetTour = factory.getOne(Tour, {path: 'guides'});
@@ -93,9 +134,7 @@ exports.nearestTours = catchAsyncErrors(async (request, response, next) => {
     const tours = await Tour.find(filter);
 
     response.status(200).json({
-        status: "ok",
-        length: tours.length,
-        tours
+        status: "ok", length: tours.length, tours
     })
 });
 
@@ -108,29 +147,20 @@ exports.distanceTours = catchAsyncErrors(async (request, response, next) => {
     }
     const multi = uni === 'mi' ? .000621371 : .001;
 
-    const pipline = [
-        {
-            $geoNear: {
-                near: {
-                    type: 'Point',
-                    coordinates: [+lng, +lat]
-                },
-                distanceField: `distance`,
-                distanceMultiplier: multi
-            }
-        },
-        {
-            $project: {
-                name: 1,
-                distance: 1
-            }
+    const pipline = [{
+        $geoNear: {
+            near: {
+                type: 'Point', coordinates: [+lng, +lat]
+            }, distanceField: `distance`, distanceMultiplier: multi
         }
-    ];
+    }, {
+        $project: {
+            name: 1, distance: 1
+        }
+    }];
     const tours = await Tour.aggregate(pipline)
 
     response.status(200).json({
-        status: "ok",
-        length: tours.length,
-        tours
+        status: "ok", length: tours.length, tours
     })
 });
