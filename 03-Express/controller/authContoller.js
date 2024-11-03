@@ -1,12 +1,10 @@
-const {promisify} = require('util')
+const { promisify } = require('util')
 const jwt = require('jsonwebtoken');
 const users = require('./../model/userModel')
 const catchAsyncErrors = require('./../Utils/catchError.js');
 const AppError = require('./../Utils/appErros.js')
-const bcryptjs = require('bcryptjs')
-const sendEmail = require('./../Utils/email.js')
+const Email = require('./../Utils/email.js')
 const crypto = require('crypto')
-const {response} = require("express");
 
 const createNewToken = async (user, statusCode, response) => {
     const token = await token_sign(user._id)
@@ -24,7 +22,7 @@ const createNewToken = async (user, statusCode, response) => {
 }
 
 const token_sign = async function (id) {
-    return await jwt.sign({id}, process.env.JWT_Secret, {
+    return await jwt.sign({ id }, process.env.JWT_Secret, {
         expiresIn: process.env.JWT_expired
     })
 }
@@ -32,18 +30,24 @@ const token_sign = async function (id) {
 exports.signUp = catchAsyncErrors(async (request, response, next) => {
 
     const user = await users.create(request.body);
+
+    const url = `${request.protocol}://${request.get('host')}/me`
+    const message = "Welcome ya bdaaaaaaaaan"
+
+    await new Email(user, url).sendWelcome('Welcome', message);
+
     await createNewToken(user, 201, response)
 })
 
 
 exports.login = catchAsyncErrors(async (request, response, next) => {
-    const {email, password} = request.body;
+    const { email, password } = request.body;
 
     if (!email || !password) {
         return next(new AppError('Please provide the password and email', 400))
     }
 
-    const user = await users.findOne({email: email}).select('+password')
+    const user = await users.findOne({ email: email }).select('+password')
 
     const is_correct_password = await user.compare_password(password, user.password)
 
@@ -80,7 +84,7 @@ exports.protect = catchAsyncErrors(async (req, res, next) => {
 
     const user_id = decoded.id;
 
-    const user = await users.findById({_id: user_id})
+    const user = await users.findById({ _id: user_id })
 
     if (!user) {
         const error = new AppError('the user Not founded', 404)
@@ -107,7 +111,7 @@ exports.Permission = (...roles) => {
 exports.forgetpassword = async (req, res, next) => {
     const email = req.body.email;
 
-    const user = await users.findOne({email: email});
+    const user = await users.findOne({ email: email });
     if (!user) return next(new AppError('There is no user with this email you nee to sign up', 401))
 
 
@@ -117,20 +121,17 @@ exports.forgetpassword = async (req, res, next) => {
     //await user.save();
 
     // to avoid this error we will use validateBeforeSave: false to ignore the valdator
-    await user.save({validateBeforeSave: false});
+    await user.save({ validateBeforeSave: false });
 
     // send email to the user to reset the password
     try {
-        /*await sendEmail({
-            email: email,
-            subject: 'Nature Password recovery',
-            message: `Hello ${user.name}.\nTo change the password click ${req.protocol}://${req.get('host')}:/api/v1/users/resetpassword/${resetToken}you have 10 minutes to reset your password.\nThe nature team`,
-        })*/
+
         const message = `Hello ${user.name}.
 To change the password click ${req.protocol}//${req.get('host')}/api/v1/users/reset/${resetToken}
 you have 10 minutes to reset your password.
 The nature team`;
-        console.log(message);
+
+        await new Email(user, message).sendRestPasswordToken('Password reset token', message)
         res.status(200).json({
             status: 'success', message: 'Password recovered successfully please check your email'
         })
@@ -159,7 +160,7 @@ exports.resetPassword = catchAsyncErrors(async (req, response, next) => {
     if (!user) return next(new AppError('Token invalid or expired', 401))
 
     // 3) update data in the DB
-    const {password, passwordConfirm} = req.body;
+    const { password, passwordConfirm } = req.body;
     user.passwordResetToken = undefined;
     user.passwordTokenExpire = undefined;
     user.password = password
@@ -180,7 +181,7 @@ exports.updatePassword = catchAsyncErrors(async (req, response, next) => {
     if (!user) return next(new AppError('You do not have permission to perform this action', 401));
 
     // 2) check if the posted password is correct.
-    const {oldPassword, newPassword, confirm} = req.body;
+    const { oldPassword, newPassword, confirm } = req.body;
 
     const is_correct_password = await user.compare_password(oldPassword, user.password)
     if (!is_correct_password) return next(new AppError("Password is incorrect", 401));
