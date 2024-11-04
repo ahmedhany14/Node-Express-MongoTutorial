@@ -8,8 +8,8 @@ exports.CreateSession = catchAsync(async (request, response, next) => {
     // Create a stripe session
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        success_url: `${request.protocol}://${request.get('host')}/`,
-        cancel_url: `${request.protocol}://${request.get('host')}/`,
+        success_url: `${request.protocol}://${request.get('host')}/api/v1/tours/`,
+        cancel_url: `${request.protocol}://${request.get('host')}/api/v1/tours/`,
         customer_email: request.user.email,
         client_reference_id: id,
         line_items: [
@@ -19,10 +19,10 @@ exports.CreateSession = catchAsync(async (request, response, next) => {
                     product_data: {
                         name: tour.name,
                     },
-                    unit_amount: tour.price * 100
+                    unit_amount: tour.price * 100,
                 },
-                quantity: 1
-            }
+                quantity: 1,
+            },
         ],
         mode: 'payment'
     });
