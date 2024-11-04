@@ -5,6 +5,8 @@ const AppErrors = require('./Utils/appErros')
 const toursRouter = require('./routes/tourRoutes');
 const usersRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRouter')
+const bookingRouter = require('./routes/bookingRouter')
+
 const ErrorHadeler = require('./controller/errorController')
 const limitRate = require('express-rate-limit')
 const helmet = require('helmet')
@@ -34,6 +36,7 @@ app.use('/api', limiter)
 app.use('/api/v1/tours', toursRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/review', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 // Handel unhandeled routes
 app.all('*', (req, res, next) => {
